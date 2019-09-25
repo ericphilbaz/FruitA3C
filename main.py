@@ -1,9 +1,5 @@
-from src.fruit import Fruit
+import os
+os.environ['KMP_WARNINGS'] = 'off'
+from environment import Environment
 
-f = Fruit(0, "dataset/dataset/")
-
-for d in f:
-	print()
-	print(f.shots_index, f.shots_tot)
-	print(f.defects_index, f.defects_tot)
-	print("###", d.shot_name, d.index, "###")
+global_env = Environment("global_env")
