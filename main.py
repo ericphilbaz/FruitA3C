@@ -1,4 +1,4 @@
-from fruit import Fruit
+from src.fruit import Fruit
 
 f = Fruit(0, "dataset/dataset/")
 
