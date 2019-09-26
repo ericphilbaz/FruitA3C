@@ -18,7 +18,7 @@ class Agent:
 		self.name = "agent_{0}".format(index)
 		self.local_env = Environment("env_{0}".format(index))
 
-	def train(self, sess, lock):
+	def train(self, sess, coord, lock):
 		"""
 		Trains the agent
 
@@ -31,9 +31,10 @@ class Agent:
 		"""
 
 		with sess.as_default(), sess.graph.as_default():
+			while not coord.should_stop():
 
-			lock.acquire()
-			self.local_env.load_fruit(sess)
-			lock.release()
-			
-			print(self.local_env.fruit.index)
+				lock.acquire()
+				self.local_env.load_fruit(sess)
+				lock.release()
+				
+				print(self.local_env.fruit.index)

@@ -8,24 +8,26 @@ from environment import Environment
 from agent import Agent
 import multiprocessing, threading
 
-global_env = Environment("global_env", load_path="dataset/dataset2/")
-
-with tf.Session() as sess:
+with tf.device("/cpu:0"):
+	global_env = Environment(load_path="dataset/dataset2/")
 
 	# n_agents = 1
 	n_agents = multiprocessing.cpu_count()
-
-	lock = threading.Lock()
 
 	agents = []
 	for i in range(n_agents):
 		agents.append(Agent(i))
 
+	coord = tf.train.Coordinator()
+	lock = threading.Lock()
+
+
+with tf.Session() as sess:
 	sess.run(tf.global_variables_initializer())
 
 	agents_threads = []
 	for agent in agents:
-		agent_train = lambda: agent.train(sess, lock)
+		agent_train = lambda: agent.train(sess, coord, lock)
 		t = threading.Thread(target=(agent_train))
 		t.start()
 		agents_threads.append(t)
