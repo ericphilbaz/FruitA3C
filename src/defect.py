@@ -1,4 +1,7 @@
 class Defect:
+	"""
+	Defect object find on fruits
+	"""
 
 	def __init__(self, shot_name, index, bounding_box, area, shot_sizes):
 		"""
