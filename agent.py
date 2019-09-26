@@ -34,7 +34,8 @@ class Agent:
 			while not coord.should_stop():
 
 				lock.acquire()
-				self.local_env.load_fruit(sess)
+				self.local_env.load_fruit(sess, coord)
 				lock.release()
 				
-				print(self.local_env.fruit.index)
+				if self.local_env.fruit is not None:
+					print(self.local_env.fruit.index)

@@ -6,7 +6,7 @@ class Environment:
 	Used to manage Fruit objects and interaction with agents
 	"""
 
-	def __init__(self, scope="global_env", starting_index=0,
+	def __init__(self, scope="global_env", starting_index=0, final_index=100,
 				load_path="dataset/dataset/", defects_thresholds=[160]):
 		"""
 		Creates a new environment that automatically loads new fruits
@@ -28,6 +28,8 @@ class Environment:
 		with tf.variable_scope(scope):
 			self.index = tf.Variable(starting_index-1, dtype=tf.int32,
 									name='index', trainable=False)
+			self.final_index = tf.Variable(final_index, dtype=tf.int32,
+									name='final_index', trainable=False)
 			self.load_path = tf.Variable(load_path, dtype=tf.string,
 									name='load_path', trainable=False)
 			self.defects_thresholds = tf.Variable(defects_thresholds, dtype=tf.int32,
@@ -48,7 +50,7 @@ class Environment:
 
 		sess.run(synchronizer)
 
-	def load_fruit(self, sess):
+	def load_fruit(self, sess, coord):
 		"""
 		Loads a new Fruit with defects
 
@@ -59,17 +61,25 @@ class Environment:
 		"""
 
 		Environment.sync(sess, "global_env", self.scope)
+		self.fruit = None
 
 		index = sess.run(self.index)+1
+		final_index = sess.run(self.final_index)
 		load_path = sess.run(self.load_path).decode("utf-8")
 		defects_thresholds = sess.run(self.defects_thresholds)
 
-		fruit = Fruit(index, load_path, defects_thresholds)
-		while not fruit.defects_tot:
-			index += 1
-			fruit = Fruit(index, load_path, defects_thresholds)
+		if index < final_index:
+			try:
+				fruit = Fruit(index, load_path, defects_thresholds)
+				while not fruit.defects_tot:
+					index += 1
+					fruit = Fruit(index, load_path, defects_thresholds)
 
-		self.fruit = fruit
-		sess.run(self.index.assign(index))
-		
-		Environment.sync(sess, self.scope, "global_env")
+				sess.run(self.index.assign(index))
+				Environment.sync(sess, self.scope, "global_env")
+
+				self.fruit = fruit				
+			except:
+				coord.request_stop()
+		else:
+			coord.request_stop()

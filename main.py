@@ -9,7 +9,7 @@ from agent import Agent
 import multiprocessing, threading
 
 with tf.device("/cpu:0"):
-	global_env = Environment(load_path="dataset/dataset2/")
+	global_env = Environment()
 
 	# n_agents = 1
 	n_agents = multiprocessing.cpu_count()
