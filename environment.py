@@ -37,4 +37,3 @@ class Environment:
 		sess.run(self.index.assign(temp_index))
 		
 		Environment.sync(sess, self.scope, "global_env")
-		print(self.fruit.index)

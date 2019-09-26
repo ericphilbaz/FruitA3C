@@ -4,7 +4,7 @@ class Agent:
 
 	def __init__(self, index):
 
-		self.index = index
+		self.name = "agent_{0}".format(index)
 		self.local_env = Environment("env_{0}".format(index))
 
 	def train(self, sess):
