@@ -15,8 +15,9 @@ with tf.Session() as sess:
 	# n_agents = 1
 	n_agents = multiprocessing.cpu_count()
 
-	agents = []
+	lock = threading.Lock()
 
+	agents = []
 	for i in range(n_agents):
 		agents.append(Agent(i))
 
@@ -24,7 +25,7 @@ with tf.Session() as sess:
 
 	agents_threads = []
 	for agent in agents:
-		agent_train = lambda: agent.train(sess)
+		agent_train = lambda: agent.train(sess, lock)
 		t = threading.Thread(target=(agent_train))
 		t.start()
 		agents_threads.append(t)
