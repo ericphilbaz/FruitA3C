@@ -8,7 +8,7 @@ from environment import Environment
 from agent import Agent
 import multiprocessing, threading
 
-global_env = Environment("global_env")
+global_env = Environment("global_env", load_path="dataset/dataset2/")
 
 with tf.Session() as sess:
 
