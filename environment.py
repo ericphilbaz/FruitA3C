@@ -10,5 +10,17 @@ class Environment:
 		self.defects_thresholds = defects_thresholds
 
 		with tf.variable_scope(scope):
-			self.index = tf.Variable(starting_index, dtype=tf.int32,
+			self.index = tf.Variable(starting_index-1, dtype=tf.int32,
 									name='index', trainable=False)
+
+	def load_fruit(self, sess):
+
+		index = sess.run(self.index)+1
+		fruit = Fruit(index, self.load_path, self.defects_thresholds)
+
+		while not fruit.defects_tot:
+			index += 1
+			fruit = Fruit(index, self.load_path, self.defects_thresholds)
+
+		self.fruit = fruit
+		sess.run(self.index.assign(index))
