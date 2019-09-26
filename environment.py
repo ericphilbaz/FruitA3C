@@ -7,13 +7,15 @@ class Environment:
 				load_path="dataset/dataset/", defects_thresholds=[160]):
 
 		self.scope = scope
-		self.defects_thresholds = defects_thresholds
+		# self.defects_thresholds = defects_thresholds
 
 		with tf.variable_scope(scope):
 			self.index = tf.Variable(starting_index-1, dtype=tf.int32,
 									name='index', trainable=False)
 			self.load_path = tf.Variable(load_path, dtype=tf.string,
 									name='load_path', trainable=False)
+			self.defects_thresholds = tf.Variable(defects_thresholds, dtype=tf.int32,
+									name='defects_thresholds', trainable=False)
 
 	@staticmethod
 	def sync(sess, from_scope, to_scope):
@@ -30,16 +32,17 @@ class Environment:
 	def load_fruit(self, sess):
 
 		Environment.sync(sess, "global_env", self.scope)
+
+		index = sess.run(self.index)+1
 		load_path = sess.run(self.load_path).decode("utf-8")
+		defects_thresholds = sess.run(self.defects_thresholds)
 
-		temp_index = sess.run(self.index)+1
-		fruit = Fruit(temp_index, load_path, self.defects_thresholds)
-
+		fruit = Fruit(index, load_path, defects_thresholds)
 		while not fruit.defects_tot:
-			temp_index += 1
-			fruit = Fruit(temp_index, load_path, self.defects_thresholds)
+			index += 1
+			fruit = Fruit(index, load_path, defects_thresholds)
 
 		self.fruit = fruit
-		sess.run(self.index.assign(temp_index))
+		sess.run(self.index.assign(index))
 		
 		Environment.sync(sess, self.scope, "global_env")
