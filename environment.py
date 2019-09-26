@@ -3,7 +3,7 @@ from src.fruit import Fruit
 
 class Environment:
 
-	def __init__(self, scope, starting_index=0,
+	def __init__(self, scope="global_env", starting_index=0,
 				load_path="dataset/dataset/", defects_thresholds=[160]):
 
 		self.scope = scope
@@ -37,3 +37,4 @@ class Environment:
 		sess.run(self.index.assign(temp_index))
 		
 		Environment.sync(sess, self.scope, "global_env")
+		print(self.fruit.index)
