@@ -42,3 +42,6 @@ class Agent:
 
 					for defect in self.local_env.fruit:
 						state = self.local_env.get_state()
+						print("analyzing...", defect.shot_name)
+						reward = self.local_env.apply_action(defect, "new")
+						print(reward)

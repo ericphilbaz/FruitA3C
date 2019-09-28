@@ -1,6 +1,7 @@
 import tensorflow as tf
 from src.fruit import Fruit
 import numpy as np
+from uuid import uuid4
 
 class Environment:
 	"""
@@ -100,3 +101,35 @@ class Environment:
 		uuid_progress = self.fruit.defects_identified/self.fruit.defects_index if self.fruit.defects_index else 0.0
 
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
+
+	def apply_action(self, defect, action, defect_matched=None):
+		"""
+		Apply action to the defect currently analyzed
+
+		Parameters
+		----------
+		defect : Defect
+			defect to apply action
+		action : str
+			action to apply
+		defect_matched : Defect
+			defect matched
+		"""
+
+		if defect_matched is None:
+			if action == "new":
+				reward = 1.
+			elif action == "match":
+				reward = -1.
+			defect.uuid = uuid4()
+		else:
+			if defect.answer == defect_matched.answer:
+				if action == "new": reward = -1.
+				elif action == "match": reward = 1.
+				defect.uuid = defect_matched.uuid
+			elif defect.answer != defect_matched:
+				if action == "new": reward = 1.
+				elif action == "match": reward = -1.
+				defect.uuid = uuid4()
+		
+		return reward
