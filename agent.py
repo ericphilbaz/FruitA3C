@@ -1,4 +1,4 @@
-from environment import Environment
+from src.environment import Environment
 
 class Agent:
 	"""
