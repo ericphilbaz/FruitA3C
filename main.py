@@ -3,11 +3,13 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
 from src.environment import Environment
+from A3C_network import A3C_Network
 from agent import Agent
 import multiprocessing, threading
 
 with tf.device('/gpu:0'):
 	global_env = Environment(final_index=1)
+	global_net = A3C_Network()
 
 	n_agents = 1
 	# n_agents = multiprocessing.cpu_count()
