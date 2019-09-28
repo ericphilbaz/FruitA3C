@@ -31,7 +31,7 @@ class Fruit:
 		self.defects_index = -1
 
 		# self.defects_analyzed = 0
-		# self.defects_identified = 0
+		self.defects_identified = 0
 		
 	def __iter__(self):
 		return self

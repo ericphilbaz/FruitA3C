@@ -1,5 +1,6 @@
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from src.fruit import Fruit
+import numpy as np
 
 class Environment:
 	"""
@@ -26,13 +27,13 @@ class Environment:
 		self.scope = scope
 
 		with tf.variable_scope(scope):
-			self.index = tf.Variable(starting_index-1, dtype=tf.int32,
+			self.index = tf.Variable(starting_index-1, dtype=tf.int64,
 									name='index', trainable=False)
-			self.final_index = tf.Variable(final_index, dtype=tf.int32,
+			self.final_index = tf.Variable(final_index, dtype=tf.int64,
 									name='final_index', trainable=False)
 			self.load_path = tf.Variable(load_path, dtype=tf.string,
 									name='load_path', trainable=False)
-			self.defects_thresholds = tf.Variable(defects_thresholds, dtype=tf.int32,
+			self.defects_thresholds = tf.Variable(defects_thresholds, dtype=tf.int64,
 									name='defects_thresholds', trainable=False)
 
 	@staticmethod
@@ -83,3 +84,19 @@ class Environment:
 				coord.request_stop()
 		else:
 			coord.request_stop()
+
+	def get_state(self):
+		"""
+		Gets the state vector
+
+		Returns
+		-------
+		state : array
+			state vector
+		"""
+
+		shots_progress = self.fruit.shots_index/self.fruit.shots_tot
+		defects_progress = self.fruit.defects_index/self.fruit.defects_tot
+		uuid_progress = self.fruit.defects_identified/self.fruit.defects_index if self.fruit.defects_index else 0.0
+
+		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))

@@ -1,18 +1,18 @@
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['KMP_WARNINGS'] = 'off'
-import tensorflow.compat.v1 as tf
+import tensorflow as tf
 tf.logging.set_verbosity(tf.logging.ERROR)
 
 from environment import Environment
 from agent import Agent
 import multiprocessing, threading
 
-with tf.device("/cpu:0"):
-	global_env = Environment()
+with tf.device('/gpu:0'):
+	global_env = Environment(final_index=1)
 
-	# n_agents = 1
-	n_agents = multiprocessing.cpu_count()
+	n_agents = 1
+	# n_agents = multiprocessing.cpu_count()
 
 	agents = []
 	for i in range(n_agents):
@@ -22,7 +22,7 @@ with tf.device("/cpu:0"):
 	lock = threading.Lock()
 
 
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 	sess.run(tf.global_variables_initializer())
 
 	agents_threads = []

@@ -39,3 +39,6 @@ class Agent:
 				
 				if self.local_env.fruit is not None:
 					print(self.local_env.fruit.index)
+
+					for defect in self.local_env.fruit:
+						state = self.local_env.get_state()
