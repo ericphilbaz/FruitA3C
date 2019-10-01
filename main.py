@@ -34,3 +34,5 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 
 	for t in agents_threads:
 		t.join()
+
+	writer = tf.summary.FileWriter('./graphs', sess.graph)
