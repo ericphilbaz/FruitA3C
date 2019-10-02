@@ -29,7 +29,9 @@ class Agent:
 		Parameters
 		----------
 		sess : tf.Session()
-			Tensorflow session used to run the train
+			TensorFlow session used to run the train
+		coord : tf.Coordinator()
+			TensorFlow coordinator used to coordinate fruit loading
 		lock : threading.Lock()
 			used to properly load a new fruit by correctly syncing the local environment
 		"""

@@ -1,10 +1,24 @@
 import tensorflow as tf
-from utils import normalized_columns_initializer
+from src.utils import normalized_columns_initializer
 
 class A3C_Network:
 
 	def __init__(self, scope="global_net", n_inputs_policy=3,
 				n_inputs_matching=3, n_actions_policy=2):
+		"""
+		Setting up the network
+
+		Parameters
+		----------
+		scope : str
+			variable scope
+		n_inputs_policy : int
+			number of policy inputs
+		n_inputs_matching : int
+			number of matching inputs
+		n_actions_policy : int
+			number of policy outputs
+		"""
 
 		self.scope = scope
 		self.n_inputs_policy = n_inputs_policy
@@ -49,6 +63,11 @@ class A3C_Network:
 	def sync(self, sess):
 		"""
 		Syncs the variables between two different environments
+
+		Parameters
+		----------
+		sess : tf.Session()
+			TensorFlow session used to run the train
 		"""
 
 		from_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, "global_net")
