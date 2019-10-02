@@ -16,7 +16,8 @@ with tf.device('/gpu:0'):
 
 	agents = []
 	for i in range(n_agents):
-		agents.append(Agent(i))
+		agents.append(Agent(i, global_net.n_inputs_policy,
+							global_net.n_inputs_matching, global_net.n_actions_policy))
 
 	coord = tf.train.Coordinator()
 	lock = threading.Lock()

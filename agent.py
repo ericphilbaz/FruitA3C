@@ -1,11 +1,13 @@
 from src.environment import Environment
+from A3C_network import A3C_Network
 
 class Agent:
 	"""
 	Used to implement the A3C algorithm
 	"""
 
-	def __init__(self, index):
+	def __init__(self, index,
+				n_inputs_policy, n_inputs_matching, n_actions_policy):
 		"""
 		Initializes a new agent
 
@@ -17,6 +19,8 @@ class Agent:
 
 		self.name = "agent_{0}".format(index)
 		self.local_env = Environment("env_{0}".format(index))
+		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
+									n_inputs_matching, n_actions_policy)
 
 	def train(self, sess, coord, lock):
 		"""
@@ -33,6 +37,7 @@ class Agent:
 		with sess.as_default(), sess.graph.as_default():
 			while not coord.should_stop():
 
+				self.local_net.sync(sess)
 				lock.acquire()
 				self.local_env.load_fruit(sess, coord)
 				lock.release()

@@ -38,7 +38,7 @@ class Environment:
 									name='defects_thresholds', trainable=False)
 
 	@staticmethod
-	def sync(sess, from_scope, to_scope):
+	def sync(sess, to_scope, from_scope="global_env"):
 		"""
 		Syncs the variables between two different environments
 		"""
@@ -62,7 +62,7 @@ class Environment:
 			Tensorflow session used to run sync parameters
 		"""
 
-		Environment.sync(sess, "global_env", self.scope)
+		Environment.sync(sess, self.scope)
 		self.fruit = None
 
 		index = sess.run(self.index)+1
@@ -78,7 +78,7 @@ class Environment:
 					fruit = Fruit(index, load_path, defects_thresholds)
 
 				sess.run(self.index.assign(index))
-				Environment.sync(sess, self.scope, "global_env")
+				Environment.sync(sess, "global_env", self.scope)
 
 				self.fruit = fruit				
 			except:

@@ -4,9 +4,12 @@ from utils import normalized_columns_initializer
 class A3C_Network:
 
 	def __init__(self, scope="global_net", n_inputs_policy=3,
-				n_inputs_matching=3, n_policy_actions=2):
+				n_inputs_matching=3, n_actions_policy=2):
 
 		self.scope = scope
+		self.n_inputs_policy = n_inputs_policy
+		self.n_inputs_matching = n_inputs_matching
+		self.n_actions_policy = n_actions_policy
 
 		with tf.variable_scope(scope):
 
@@ -34,7 +37,7 @@ class A3C_Network:
 			self.layer_1p = tf.nn.relu(tf.matmul(self.input_vector_extended, self.W_1p,
 												name="matmul_1p"), name="layer_1p")
 
-			self.W_policy = tf.get_variable(name="W_policy", shape=[4, n_policy_actions],
+			self.W_policy = tf.get_variable(name="W_policy", shape=[4, n_actions_policy],
 									initializer=normalized_columns_initializer(0.01))
 			self.policy = tf.nn.softmax(tf.matmul(self.layer_1p, self.W_policy,
 												name="matmul_policy"), name="policy")
@@ -42,3 +45,17 @@ class A3C_Network:
 			self.W_value = tf.get_variable(name="W_value", shape=[4, 1],
 									initializer=normalized_columns_initializer(1.0))
 			self.value = tf.matmul(self.layer_1p, self.W_value, name="value")
+
+	def sync(self, sess):
+		"""
+		Syncs the variables between two different environments
+		"""
+
+		from_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, "global_net")
+		to_vars = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, self.scope)
+
+		synchronizer = []
+		for from_var, to_var in zip(from_vars, to_vars):
+			synchronizer.append(to_var.assign(from_var))
+
+		sess.run(synchronizer)
