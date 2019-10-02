@@ -1,3 +1,5 @@
+import numpy as np
+
 class Defect:
 	"""
 	Defect object find on fruits
@@ -44,8 +46,8 @@ class Defect:
 			an array of differences, in absolute value, between 0 (different) and 1 (same)
 		"""
 
-		delta_x = 1 - np.abs(self.xc - defect.xc)/self.shot_sizes[1]
-		delta_y = 1 - np.abs(self.yc - defect.yc)/self.img_sizes[0]
-		delta_area = 1 - np.abs(self.area - defect.area)/(self.img_sizes[1]*self.img_sizes[0])
+		delta_x = 1 - np.abs(self.x_center - defect.x_center)/self.shot_sizes[1]
+		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0]
+		delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0])
 
-		return np.array([delta_x, delta_y, delta_A]).reshape((1, 3))
+		return np.array([delta_x, delta_y, delta_area]).reshape((1, 3))
