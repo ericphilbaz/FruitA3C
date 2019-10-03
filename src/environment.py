@@ -26,7 +26,6 @@ class Environment:
 		"""
 
 		self.scope = scope
-		self.defects = dict()
 
 		with tf.variable_scope(scope):
 			self.index = tf.Variable(starting_index-1, dtype=tf.int64,
@@ -81,7 +80,8 @@ class Environment:
 				sess.run(self.index.assign(index))
 				Environment.sync(sess, "global_env", self.scope)
 
-				self.fruit = fruit				
+				self.fruit = fruit
+				self.answers = dict.fromkeys(self.fruit.defects_indices, [])			
 			except:
 				coord.request_stop()
 		else:
@@ -118,42 +118,42 @@ class Environment:
 		"""
 		reward = 0
 
-		# defects are the same defect
-		if defect is defect_matched:
-			# bad because defects are same
-			if action is "new":
-				uuid = uuid4()
-				self.defects[defect.index] = uuid
-				defect.ID = uuid
-				self.fruit.defects_identified += 1
-				reward = -1.
-			# good because defects are same
-			elif action is "match":
-				uuid = uuid4()
-				self.defects[defect.index] = uuid
-				defect.ID = uuid
-				self.fruit.defects_identified += 1
-				reward = +1.
-			# not bad nor good
-			else:
-				reward = +0.
+		# # defects are the same defect
+		# if defect is defect_matched:
+		# 	# bad because defects are same
+		# 	if action is "new":
+		# 		uuid = uuid4()
+		# 		self.defects[defect.index] = uuid
+		# 		defect.ID = uuid
+		# 		self.fruit.defects_identified += 1
+		# 		reward = -1.
+		# 	# good because defects are same
+		# 	elif action is "match":
+		# 		uuid = uuid4()
+		# 		self.defects[defect.index] = uuid
+		# 		defect.ID = uuid
+		# 		self.fruit.defects_identified += 1
+		# 		reward = +1.
+		# 	# not bad nor good
+		# 	else:
+		# 		reward = +0.
 				
-		# defects are at least from different shots
-		else:
-			if action is "new":
-				# bad because the same defect was already identified
-				if defect.index in self.defects:
-					uuid = uuid4()
-					defect.ID = uuid
-					self.fruit.defects_identified += 1
-					reward = -1.
-				# good because it is new
-				else:
-					uuid = uuid4()
-					self.defects[defect.index] = uuid
-					defect.ID = uuid
-					self.fruit.defects_identified += 1
-					reward = +1.
+		# # defects are at least from different shots
+		# else:
+		# 	if action is "new":
+		# 		# bad because the same defect was already identified
+		# 		if defect.index in self.defects:
+		# 			uuid = uuid4()
+		# 			defect.ID = uuid
+		# 			self.fruit.defects_identified += 1
+		# 			reward = -1.
+		# 		# good because it is new
+		# 		else:
+		# 			uuid = uuid4()
+		# 			self.defects[defect.index] = uuid
+		# 			defect.ID = uuid
+		# 			self.fruit.defects_identified += 1
+		# 			reward = +1.
 
 
 		# if defect == defect_matched:
