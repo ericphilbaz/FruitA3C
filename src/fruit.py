@@ -26,9 +26,9 @@ class Fruit:
 		self.shots_tot = len(self.defects)
 		self.defects_tot = sum([len(defects_per_shot) for defects_per_shot in self.defects])
 
-		self.shots_index = next(i for i, defects_list in enumerate(self.defects) if defects_list) if self.defects_tot else 0
-		self.defects_in_shots_index = 0
-		self.defects_index = -1
+		self.shot_index = next(i for i, defects_list in enumerate(self.defects) if defects_list) if self.defects_tot else 0
+		self.defect_in_shot_index = 0
+		self.defect_index = -1
 
 		# self.defects_analyzed = 0
 		self.defects_identified = 0
@@ -46,21 +46,21 @@ class Fruit:
 			next defect to be analyzed
 		"""
 
-		if self.defects_in_shots_index == len(self.defects[self.shots_index]):
-			self.defects_in_shots_index = 0
-			self.shots_index += next((i for i, v in enumerate(self.defects[self.shots_index+1:]) if v), 0)+1
+		if self.defect_in_shot_index == len(self.defects[self.shot_index]):
+			self.defect_in_shot_index = 0
+			self.shot_index += next((i for i, v in enumerate(self.defects[self.shot_index+1:]) if v), 0)+1
 			
-		if self.defects_index < self.defects_tot-1:
-			defect = self.defects[self.shots_index][self.defects_in_shots_index]
-			self.defects_in_shots_index += 1
-			self.defects_index += 1
+		if self.defect_index < self.defects_tot-1:
+			defect = self.defects[self.shot_index][self.defect_in_shot_index]
+			self.defect_in_shot_index += 1
+			self.defect_index += 1
 			return defect
 		else:
 			raise StopIteration
 
 
 	@staticmethod
-	def load(load_path, index, defects_thresholds):
+	def load(load_path, fruit_index, defects_thresholds):
 		"""
 		Loads shots and answers (indices of defects on the fruit)
 
@@ -77,7 +77,7 @@ class Fruit:
 			list of defects divided in sublists (shots)
 		"""
 
-		name = load_path + "{0}.tiff".format(index)
+		name = load_path + "{0}.tiff".format(fruit_index)
 		with tifffile.TiffFile(name) as tif:
 			shots = tif.asarray()
 			answers = ast.literal_eval(tif.pages[0].tags["ImageDescription"].value)
@@ -86,7 +86,7 @@ class Fruit:
 		for i, (shot, answers_list) in enumerate(zip(shots, answers)):
 			thresholds = shot < defects_thresholds[0]
 			labels = label(thresholds)
-			defects_in_shot = [Defect("{0}_{1}".format(index, i), answer, defect.bbox, defect.area, shot.shape) for answer, defect in zip(answers_list, regionprops(labels))]
+			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, defect.bbox, defect.area, shot.shape) for defect_index, defect in zip(answers_list, regionprops(labels))]
 			defects.append(defects_in_shot)
 
 		defects_indices = set(d.index for l in defects for d in l)

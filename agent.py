@@ -42,7 +42,7 @@ class Agent:
 			defect matched
 		"""
 
-		defects_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shots_index]
+		defects_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
 		defect_matched, val_matched = defect, -1
 
 		for s in defects_to_match:

@@ -97,9 +97,9 @@ class Environment:
 			state vector
 		"""
 
-		shots_progress = self.fruit.shots_index/self.fruit.shots_tot
-		defects_progress = self.fruit.defects_index/self.fruit.defects_tot
-		uuid_progress = self.fruit.defects_identified/self.fruit.defects_index if self.fruit.defects_index else 0.0
+		shots_progress = self.fruit.shot_index/self.fruit.shots_tot
+		defects_progress = self.fruit.defect_index/self.fruit.defects_tot
+		uuid_progress = self.fruit.defects_identified/self.fruit.defect_index if self.fruit.defect_index else 0.0
 
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
 
@@ -117,71 +117,5 @@ class Environment:
 			defect matched
 		"""
 		reward = 0
-
-		# # defects are the same defect
-		# if defect is defect_matched:
-		# 	# bad because defects are same
-		# 	if action is "new":
-		# 		uuid = uuid4()
-		# 		self.defects[defect.index] = uuid
-		# 		defect.ID = uuid
-		# 		self.fruit.defects_identified += 1
-		# 		reward = -1.
-		# 	# good because defects are same
-		# 	elif action is "match":
-		# 		uuid = uuid4()
-		# 		self.defects[defect.index] = uuid
-		# 		defect.ID = uuid
-		# 		self.fruit.defects_identified += 1
-		# 		reward = +1.
-		# 	# not bad nor good
-		# 	else:
-		# 		reward = +0.
-				
-		# # defects are at least from different shots
-		# else:
-		# 	if action is "new":
-		# 		# bad because the same defect was already identified
-		# 		if defect.index in self.defects:
-		# 			uuid = uuid4()
-		# 			defect.ID = uuid
-		# 			self.fruit.defects_identified += 1
-		# 			reward = -1.
-		# 		# good because it is new
-		# 		else:
-		# 			uuid = uuid4()
-		# 			self.defects[defect.index] = uuid
-		# 			defect.ID = uuid
-		# 			self.fruit.defects_identified += 1
-		# 			reward = +1.
-
-
-		# if defect == defect_matched:
-		# 	if action == "new":
-		# 		reward = -1.
-		# 	elif action == "match":
-		# 		reward = 1.
-		# 	else:
-		# 		reward = 0.
-
-		# else:
-		# 	if action == "new":
-		# 		reward = -1.
-		# 	elif action == "match":
-		# 		reward = 1.
-		# 	else:
-		# 		reward = 0.
-
-
-
-
-		# elif defect.index == defect_matched.index:
-		# 	if action == "new": reward = -1.
-		# 	elif action == "match": reward = 1.
-		# 	defect.ID = defect_matched.ID
-		# else:
-		# 	if action == "new": reward = 1.
-		# 	elif action == "match": reward = -1.
-		# 	defect.ID = uuid4()
 		
 		return reward
