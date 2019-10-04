@@ -107,8 +107,10 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
+					print(self.local_env.answers)
 
 					for defect in self.local_env.fruit:
+						
 
 						defect_matched = self.find_match(sess, defect)
 						print(defect_matched.shot_name if defect_matched else defect_matched)
@@ -119,8 +121,9 @@ class Agent:
 						print("analyzing...", defect.shot_name)
 
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						# print(action, action_idx)
+						print(action)
 
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 						# print(reward)
+						print(self.local_env.answers)
 						print()
