@@ -81,7 +81,9 @@ class Environment:
 				Environment.sync(sess, "global_env", self.scope)
 
 				self.fruit = fruit
-				self.answers = {key: [] for key in self.fruit.defects_indices}		
+				self.answers = {key: [] for key in self.fruit.defects_indices}
+				self.uuids = []
+				# self.loss = -(sum([abs(len(l)-1) for key, l in self.answers.items()]) + abs(len(self.uuids)-len(self.answers)))
 			except:
 				coord.request_stop()
 		else:
@@ -106,31 +108,35 @@ class Environment:
 	def add_uuid(self, defect, defect_matched=None):
 
 		new_uuid = uuid4()
-		print("DEBUG 0")
 
 		if not defect_matched:
-			print("DEBUG 1")
 			defect.ID = new_uuid
 			self.answers[defect.index].append(new_uuid)
 			self.fruit.defects_identified += 1
+			self.uuids.append(new_uuid)
 		else:
-			print("DEBUG 2")
 			if not defect_matched.ID:
-				print("DEBUG 3")
 				defect.ID = new_uuid
 				defect_matched.ID = new_uuid
 				self.answers[defect.index].append(new_uuid)
 				if defect_matched.index != defect.index:
-					print("DEBUG 4")
 					self.answers[defect_matched.index].append(new_uuid)
 				self.fruit.defects_identified += 2
+				self.uuids.append(new_uuid)
 			else:
-				print("DEBUG 5")
 				defect.ID = defect_matched.ID
 				if defect_matched.index != defect.index:
-					print("DEBUG 6")
 					self.answers[defect.index].append(defect_matched.ID)
 				self.fruit.defects_identified += 1
+
+	# def get_reward(self):
+
+	# 	new_loss = -(sum([abs(len(l)-1) for key, l in self.answers.items()]) + abs(len(self.uuids)-len(self.answers)))
+
+	# 	reward = new_loss-self.loss
+	# 	self.loss = new_loss
+
+	# 	return reward
 
 	def apply_action(self, action, defect, defect_matched):
 		"""
@@ -146,7 +152,6 @@ class Environment:
 			defect matched
 		"""
 		reward = 0
-
 		if action is "new":
 			self.add_uuid(defect)
 		elif action is "match":
@@ -154,4 +159,5 @@ class Environment:
 		else:
 			pass
 
+		# reward = self.get_reward()
 		return reward

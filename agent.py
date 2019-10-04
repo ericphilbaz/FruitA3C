@@ -108,22 +108,23 @@ class Agent:
 				
 				if self.local_env.fruit is not None:
 					print(self.local_env.answers)
+					# print(self.local_env.loss)
 
 					for defect in self.local_env.fruit:
-						
+						print("analyzing...", defect.shot_name, defect.index)
 
 						defect_matched = self.find_match(sess, defect)
-						print(defect_matched.shot_name if defect_matched else defect_matched)
+						print("matched with", defect_matched.shot_name, defect_matched.index)
 
+						print()
 						state = self.local_env.get_state()
-						# print(state)
-
-						print("analyzing...", defect.shot_name)
+						# print("state is", state)
 
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						print(action)
+						print("action chosen is", action)
 
 						reward = self.local_env.apply_action(action, defect, defect_matched)
-						# print(reward)
-						print(self.local_env.answers)
-						print()
+						# print("reward and loss are", reward, self.local_env.loss)
+						print("new answers are:", self.local_env.answers)
+						print("total uuids is", len(self.local_env.uuids))
+						print("#########################################")
