@@ -83,7 +83,10 @@ class Environment:
 				self.fruit = fruit
 				self.answers_dict = {key: set() for key in self.fruit.defects_indices}
 				self.uuids_dict = dict()
-				self.new_loss = -sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
+				key_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
+				uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
+				difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
+				self.loss = key_loss + uuids_loss + difference_loss
 			except:
 				coord.request_stop()
 		else:
@@ -105,38 +108,17 @@ class Environment:
 
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
 
-	# def add_uuid(self, defect, defect_matched=None):
+	def get_reward(self):
 
-		# new_uuid = uuid4()
+		key_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
+		uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
+		difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
 
-		# if not defect_matched:
-		# 	defect.ID = new_uuid
-		# 	self.answers_dict[defect.index].append(new_uuid)
-		# 	self.fruit.defects_identified += 1
-		# 	self.uuids_dict.append(new_uuid)
-		# else:
-		# 	if not defect_matched.ID:
-		# 		defect.ID = new_uuid
-		# 		defect_matched.ID = new_uuid
-		# 		self.answers_dict[defect.index].append(new_uuid)
-		# 		if defect_matched.index != defect.index:
-		# 			self.answers_dict[defect_matched.index].append(new_uuid)
-		# 		self.fruit.defects_identified += 2
-		# 		self.uuids_dict.append(new_uuid)
-		# 	else:
-		# 		defect.ID = defect_matched.ID
-		# 		if defect_matched.index != defect.index:
-		# 			self.answers_dict[defect.index].append(defect_matched.ID)
-		# 		self.fruit.defects_identified += 1
+		loss = key_loss + uuids_loss + difference_loss
+		reward = self.loss - loss
+		self.loss = loss
 
-	# def get_reward(self):
-
-	# 	new_loss = -sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
-
-	# 	reward = new_loss-self.new_loss
-	# 	self.new_loss = new_loss
-
-	# 	return reward
+		return reward
 
 	def apply_action(self, action, defect, defect_matched):
 		"""
@@ -151,20 +133,20 @@ class Environment:
 		defect_matched : Defect
 			defect matched
 		"""
-		reward = 0
 		uuid = uuid4()
+		identified = 0
 
 		if action is "new":
 			self.answers_dict[defect.index].add(uuid)
 			self.uuids_dict[uuid] = set([defect.index])
 			defect.uuid = uuid
-			self.fruit.defects_identified += 1
+			identified = 1
 		elif action is "match":
 			if defect_matched.uuid:
 				self.answers_dict[defect.index].add(defect_matched.uuid)
 				self.uuids_dict[defect_matched.uuid].add(defect.index)
 				defect.uuid = defect_matched.uuid
-				self.fruit.defects_identified += 1
+				identified = 1
 			else:
 				self.answers_dict[defect_matched.index].add(uuid)
 				self.uuids_dict[uuid] = set([defect_matched.index])
@@ -172,15 +154,10 @@ class Environment:
 				self.answers_dict[defect.index].add(defect_matched.uuid)
 				self.uuids_dict[defect_matched.uuid].add(defect.index)
 				defect.uuid = defect_matched.uuid
-				self.fruit.defects_identified += 2 if defect != defect_matched else 1
+				identified = 2 if defect != defect_matched else 1
 		else:
 			pass
 
-		# 	self.add_uuid(defect)
-		# elif action is "match":
-		# 	self.add_uuid(defect, defect_matched)
-		# else:
-		# 	pass
-
-		# reward = self.get_reward()
+		self.fruit.defects_identified += identified
+		reward = self.get_reward()
 		return reward

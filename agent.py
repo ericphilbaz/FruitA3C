@@ -107,9 +107,10 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					print(self.local_env.answers_dict)
-					print(self.local_env.uuids_dict)
-					print(self.local_env.new_loss)
+					# print(self.local_env.answers_dict)
+					# print(self.local_env.uuids_dict)
+					# print(self.local_env.loss)
+					total_reward = 0
 
 					for defect in self.local_env.fruit:
 						print("analyzing...", defect.shot_name, defect.index)
@@ -118,22 +119,16 @@ class Agent:
 						print("matched with", defect_matched.shot_name, defect_matched.index)
 
 						state = self.local_env.get_state()
-						print("state is", state)
+						# print("state is", state)
 
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						print("action chosen is", action)
 
 						reward = self.local_env.apply_action(action, defect, defect_matched)
-						# print("reward and loss are", reward, self.local_env.new_loss)
-						print(self.local_env.answers_dict)
+						total_reward += reward
+						print("reward and total reward are:", reward, total_reward)
+						# print(self.local_env.answers_dict)
+						# print()
+						# print(self.local_env.uuids_dict)
+						# print()
 						print()
-						print(self.local_env.uuids_dict)
-						print()
-						print()
-
-				# inv_map = {}
-				# for k,v in self.local_env.answers.items():
-				# 	for x in v:
-				# 		inv_map.setdefault(x,[]).append(k)
-				# print(self.local_env.answers)
-				# print(inv_map)
