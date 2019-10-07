@@ -92,6 +92,9 @@ class Agent:
 
 		return value
 
+	def update(self, sess, rollout, gamma):
+		pass
+
 	def train(self, sess, coord, lock):
 		"""
 		Trains the agent

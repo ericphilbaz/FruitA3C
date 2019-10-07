@@ -60,6 +60,27 @@ class A3C_Network:
 									initializer=normalized_columns_initializer(1.0))
 			self.value = tf.matmul(self.layer_1p, self.W_value, name="value")
 
+			if scope != "global":
+
+				self.actions = tf.placeholder(shape=[None], dtype=tf.int32)
+				self.actions_onehot = tf.one_hot(self.actions, n_outputs, dtype=tf.float32)
+				self.target_value = tf.placeholder(shape=[None], dtype=tf.float32)
+				self.advantages = tf.placeholder(shape=[None], dtype=tf.float32)
+
+				self.responsible_outputs = tf.reduce_sum(self.policy * self.actions_onehot, [1])
+
+				self.value_loss = 0.5 * tf.reduce_sum(tf.square(self.target_value - tf.reshape(self.value,[-1])))
+				self.entropy = -tf.reduce_sum(self.policy * tf.log(self.policy))
+				self.policy_loss = -tf.reduce_sum(tf.log(self.responsible_outputs)*self.advantages)
+				self.loss = 0.5 * self.value_loss + self.policy_loss - self.entropy * 0.01
+
+				local_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope)
+				self.gradients = tf.gradients(self.loss,local_vars)
+
+				global_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, 'global')
+				self.apply_grads = trainer.apply_gradients(zip(self.gradients,global_vars))
+
+
 	def sync(self, sess):
 		"""
 		Syncs the variables between two different environments
