@@ -4,7 +4,7 @@ from src.utils import normalized_columns_initializer
 class A3C_Network:
 
 	def __init__(self, scope="global_net", n_inputs_policy=3,
-				n_inputs_matching=3, n_actions_policy=3):
+				n_inputs_matching=3, n_actions_policy=3, trainer=None):
 		"""
 		Setting up the network
 
@@ -29,7 +29,7 @@ class A3C_Network:
 
 			# matching part
 			self.matching_vector = tf.placeholder(name="matching_vector",
-												shape=[1, n_inputs_matching], dtype=tf.float32)
+												shape=[None, n_inputs_matching], dtype=tf.float32)
 
 			self.W_1m = tf.get_variable(name="W_1m", shape=[n_inputs_matching, 4],
 											initializer=tf.initializers.glorot_uniform())
@@ -43,7 +43,7 @@ class A3C_Network:
 
 			# policy part
 			self.input_vector = tf.placeholder(name="input_vector",
-												shape=[1, n_inputs_policy], dtype=tf.float32)
+												shape=[None, n_inputs_policy], dtype=tf.float32)
 			self.input_vector_extended = tf.concat([self.input_vector, self.match], 1)
 
 			self.W_1p = tf.get_variable(name="W_1p", shape=[n_inputs_policy+1, 4],
@@ -60,10 +60,10 @@ class A3C_Network:
 									initializer=normalized_columns_initializer(1.0))
 			self.value = tf.matmul(self.layer_1p, self.W_value, name="value")
 
-			if scope != "global":
+			if scope != "global_net":
 
 				self.actions = tf.placeholder(shape=[None], dtype=tf.int32)
-				self.actions_onehot = tf.one_hot(self.actions, n_outputs, dtype=tf.float32)
+				self.actions_onehot = tf.one_hot(self.actions, n_actions_policy, dtype=tf.float32)
 				self.target_value = tf.placeholder(shape=[None], dtype=tf.float32)
 				self.advantages = tf.placeholder(shape=[None], dtype=tf.float32)
 

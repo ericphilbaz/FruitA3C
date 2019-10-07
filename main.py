@@ -8,7 +8,9 @@ from agent import Agent
 import multiprocessing, threading
 
 with tf.device('/gpu:0'):
-	global_env = Environment(final_index=50)
+	trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
+
+	global_env = Environment(final_index=1)
 	global_net = A3C_Network()
 
 	n_agents = 1
@@ -16,8 +18,8 @@ with tf.device('/gpu:0'):
 
 	agents = []
 	for i in range(n_agents):
-		agents.append(Agent(i, global_net.n_inputs_policy,
-							global_net.n_inputs_matching, global_net.n_actions_policy))
+		agents.append(Agent(i, global_net.n_inputs_policy, global_net.n_inputs_matching,
+							global_net.n_actions_policy, trainer))
 
 	coord = tf.train.Coordinator()
 	lock = threading.Lock()

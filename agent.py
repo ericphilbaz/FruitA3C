@@ -7,8 +7,8 @@ class Agent:
 	Used to implement the A3C algorithm
 	"""
 
-	def __init__(self, index,
-				n_inputs_policy, n_inputs_matching, n_actions_policy):
+	def __init__(self, index, n_inputs_policy,
+				n_inputs_matching, n_actions_policy, trainer):
 		"""
 		Initializes a new agent
 
@@ -21,7 +21,7 @@ class Agent:
 		self.name = "agent_{0}".format(index)
 		self.local_env = Environment("env_{0}".format(index))
 		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
-									n_inputs_matching, n_actions_policy)
+									n_inputs_matching, n_actions_policy, trainer)
 
 		self.actions_available = ["new", "match", "wait"]
 
@@ -92,8 +92,30 @@ class Agent:
 
 		return value
 
-	def update(self, sess, rollout, gamma):
-		pass
+	def update(self, sess, analysis, gamma):
+		
+		analysis = np.array(analysis)
+
+		states = analysis[:, 0]
+		matching = analysis[:, 1]
+		actions = analysis[:, 2]
+		rewards = analysis[:, 3]
+		values = analysis[:, 4]
+
+		values_plus = np.asarray(values.tolist() + [0.0])
+		advantages = rewards + gamma * values_plus[1:] - values_plus[:-1]
+
+		feed_dict = {self.local_net.target_value:rewards,
+					self.local_net.input_vector:np.vstack(states),
+					self.local_net.matching_vector:np.vstack(matching),
+					self.local_net.actions:actions,
+					self.local_net.advantages:advantages}
+		value_loss, policy_loss, entropy, loss, _ = sess.run([self.local_net.value_loss,
+															self.local_net.policy_loss,
+															self.local_net.entropy,
+															self.local_net.loss,
+															self.local_net.apply_grads],
+															feed_dict=feed_dict)
 
 	def train(self, sess, coord, lock):
 		"""
@@ -133,6 +155,8 @@ class Agent:
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 
-						fruit_analysis.append([state, action_idx, reward, value])
+						fruit_analysis.append([state, defect-defect_matched, action_idx, reward, value])
 						fruit_values.append(value)
 						fruit_reward += reward
+
+					self.update(sess, fruit_analysis, 1)
