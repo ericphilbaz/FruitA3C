@@ -84,6 +84,14 @@ class Agent:
 
 		return self.actions_available[action_idx], action_idx
 
+	def value(self, sess, state, defect, defect_matched):
+
+		value = sess.run(self.local_net.value,
+						feed_dict={self.local_net.input_vector:state,
+									self.local_net.matching_vector:defect-defect_matched})
+
+		return value
+
 	def train(self, sess, coord, lock):
 		"""
 		Trains the agent
@@ -107,6 +115,7 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
+					print(self.local_env.fruit.index)
 					# print(self.local_env.answers_dict)
 					# print(self.local_env.uuids_dict)
 					# print(self.local_env.loss)
@@ -116,7 +125,8 @@ class Agent:
 						# print("analyzing...", defect.shot_name, defect.index)
 
 						defect_matched = self.find_match(sess, defect)
-						# print("matched with", defect_matched.shot_name, defect_matched.index)
+						# print("matched with", defect_matched.shot_name,
+								# defect_matched.index)
 
 						state = self.local_env.get_state()
 						# print("state is", state)
