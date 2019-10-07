@@ -26,7 +26,7 @@ class Defect:
 		self.shot_name = shot_name
 		self.shot_sizes = shot_sizes
 
-		self.ID = None
+		self.uuid = None
 		self.index = index
 
 		self.x_center = (bounding_box[3] - bounding_box[1])/2

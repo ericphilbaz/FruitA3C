@@ -23,7 +23,7 @@ class Agent:
 		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
 									n_inputs_matching, n_actions_policy)
 
-		self.actions_available = ["new", "match"]
+		self.actions_available = ["new", "match", "wait"]
 
 	def find_match(self, sess, defect):
 		"""
@@ -107,8 +107,9 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					print(self.local_env.answers)
-					# print(self.local_env.loss)
+					print(self.local_env.answers_dict)
+					print(self.local_env.uuids_dict)
+					print(self.local_env.new_loss)
 
 					for defect in self.local_env.fruit:
 						print("analyzing...", defect.shot_name, defect.index)
@@ -116,15 +117,23 @@ class Agent:
 						defect_matched = self.find_match(sess, defect)
 						print("matched with", defect_matched.shot_name, defect_matched.index)
 
-						print()
 						state = self.local_env.get_state()
-						# print("state is", state)
+						print("state is", state)
 
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						print("action chosen is", action)
 
 						reward = self.local_env.apply_action(action, defect, defect_matched)
-						# print("reward and loss are", reward, self.local_env.loss)
-						print("new answers are:", self.local_env.answers)
-						print("total uuids is", len(self.local_env.uuids))
-						print("#########################################")
+						# print("reward and loss are", reward, self.local_env.new_loss)
+						print(self.local_env.answers_dict)
+						print()
+						print(self.local_env.uuids_dict)
+						print()
+						print()
+
+				# inv_map = {}
+				# for k,v in self.local_env.answers.items():
+				# 	for x in v:
+				# 		inv_map.setdefault(x,[]).append(k)
+				# print(self.local_env.answers)
+				# print(inv_map)
