@@ -8,7 +8,7 @@ from agent import Agent
 import multiprocessing, threading
 
 with tf.device('/gpu:0'):
-	global_env = Environment(final_index=100)
+	global_env = Environment(final_index=50)
 	global_net = A3C_Network()
 
 	n_agents = 1

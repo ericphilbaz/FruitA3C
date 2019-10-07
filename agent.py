@@ -116,29 +116,20 @@ class Agent:
 				
 				if self.local_env.fruit is not None:
 					print(self.local_env.fruit.index)
-					# print(self.local_env.answers_dict)
-					# print(self.local_env.uuids_dict)
-					# print(self.local_env.loss)
-					total_reward = 0
+
+					fruit_analysis = []
+					fruit_values = []
+					fruit_reward = 0
 
 					for defect in self.local_env.fruit:
-						# print("analyzing...", defect.shot_name, defect.index)
 
 						defect_matched = self.find_match(sess, defect)
-						# print("matched with", defect_matched.shot_name,
-								# defect_matched.index)
-
 						state = self.local_env.get_state()
-						# print("state is", state)
 
+						value = self.value(sess, state, defect, defect_matched)
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						# print("action chosen is", action)
-
 						reward = self.local_env.apply_action(action, defect, defect_matched)
-						total_reward += reward
-						# print("reward and total reward are:", reward, total_reward)
-						# print(self.local_env.answers_dict)
-						# print()
-						# print(self.local_env.uuids_dict)
-						# print()
-						# print()
+
+						fruit_analysis.append([state, action_idx, reward, value])
+						fruit_values.append(value)
+						fruit_reward += reward
