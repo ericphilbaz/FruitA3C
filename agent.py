@@ -113,22 +113,22 @@ class Agent:
 					total_reward = 0
 
 					for defect in self.local_env.fruit:
-						print("analyzing...", defect.shot_name, defect.index)
+						# print("analyzing...", defect.shot_name, defect.index)
 
 						defect_matched = self.find_match(sess, defect)
-						print("matched with", defect_matched.shot_name, defect_matched.index)
+						# print("matched with", defect_matched.shot_name, defect_matched.index)
 
 						state = self.local_env.get_state()
 						# print("state is", state)
 
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						print("action chosen is", action)
+						# print("action chosen is", action)
 
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 						total_reward += reward
-						print("reward and total reward are:", reward, total_reward)
+						# print("reward and total reward are:", reward, total_reward)
 						# print(self.local_env.answers_dict)
 						# print()
 						# print(self.local_env.uuids_dict)
 						# print()
-						print()
+						# print()

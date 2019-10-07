@@ -81,12 +81,11 @@ class Environment:
 				Environment.sync(sess, "global_env", self.scope)
 
 				self.fruit = fruit
+
 				self.answers_dict = {key: set() for key in self.fruit.defects_indices}
 				self.uuids_dict = dict()
-				key_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
-				uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
-				difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
-				self.loss = key_loss + uuids_loss + difference_loss
+				self.loss = self.get_loss()
+				
 			except:
 				coord.request_stop()
 		else:
@@ -108,13 +107,20 @@ class Environment:
 
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
 
-	def get_reward(self):
+	def get_loss(self):
 
-		key_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
+		keys_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
 		uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
 		difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
+		
+		loss = keys_loss + uuids_loss + difference_loss
 
-		loss = key_loss + uuids_loss + difference_loss
+		return loss
+
+	def get_reward(self):
+
+		loss = self.get_loss()
+
 		reward = self.loss - loss
 		self.loss = loss
 
