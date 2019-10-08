@@ -2,6 +2,7 @@ from src.environment import Environment
 from A3C_network import A3C_Network
 from src.utils import discount
 import numpy as np
+import tensorflow as tf
 
 class Agent:
 	"""
@@ -9,7 +10,8 @@ class Agent:
 	"""
 
 	def __init__(self, index, n_inputs_policy,
-				n_inputs_matching, n_actions_policy, trainer):
+				n_inputs_matching, n_actions_policy, trainer,
+				load_path="dataset/dataset/"):
 		"""
 		Initializes a new agent
 
@@ -20,11 +22,13 @@ class Agent:
 		"""
 
 		self.name = "agent_{0}".format(index)
-		self.local_env = Environment("env_{0}".format(index))
+		self.local_env = Environment("env_{0}".format(index), load_path=load_path)
 		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
 									n_inputs_matching, n_actions_policy, trainer)
 
 		self.actions_available = ["new", "match", "wait"]
+
+		self.summary_writer = tf.summary.FileWriter("./graphs/train_"+str(self.name))
 
 	def find_match(self, sess, defect):
 		"""
@@ -121,6 +125,9 @@ class Agent:
 															self.local_net.apply_grads],
 															feed_dict=feed_dict)
 
+		length = len(analysis)
+		return value_loss/length, policy_loss/length, entropy/length, loss/length
+
 	def train(self, sess, coord, lock):
 		"""
 		Trains the agent
@@ -164,4 +171,4 @@ class Agent:
 						fruit_values.append(value)
 						fruit_reward += reward
 
-					self.update(sess, fruit_analysis, 1)
+					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)

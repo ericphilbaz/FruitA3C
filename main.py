@@ -7,19 +7,21 @@ from A3C_network import A3C_Network
 from agent import Agent
 import multiprocessing, threading
 
+load_path = "dataset/dataset/"
+
 with tf.device('/gpu:0'):
 	trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
 
-	global_env = Environment(final_index=1)
+	global_env = Environment(load_path=load_path, final_index=10)
 	global_net = A3C_Network()
 
-	n_agents = 1
-	# n_agents = multiprocessing.cpu_count()
+	# n_agents = 1
+	n_agents = multiprocessing.cpu_count()
 
 	agents = []
 	for i in range(n_agents):
 		agents.append(Agent(i, global_net.n_inputs_policy, global_net.n_inputs_matching,
-							global_net.n_actions_policy, trainer))
+							global_net.n_actions_policy, trainer, load_path))
 
 	coord = tf.train.Coordinator()
 	lock = threading.Lock()

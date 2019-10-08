@@ -26,14 +26,14 @@ class Environment:
 		"""
 
 		self.scope = scope
+		self.load_path = tf.constant(load_path, dtype=tf.string,
+									name='load_path')
 
 		with tf.variable_scope(scope):
 			self.index = tf.Variable(starting_index-1, dtype=tf.int64,
 									name='index', trainable=False)
 			self.final_index = tf.Variable(final_index, dtype=tf.int64,
 									name='final_index', trainable=False)
-			self.load_path = tf.Variable(load_path, dtype=tf.string,
-									name='load_path', trainable=False)
 			self.defects_thresholds = tf.Variable(defects_thresholds, dtype=tf.int64,
 									name='defects_thresholds', trainable=False)
 
