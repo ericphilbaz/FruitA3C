@@ -11,7 +11,7 @@ class Agent:
 
 	def __init__(self, index, n_inputs_policy,
 				n_inputs_matching, n_actions_policy, trainer,
-				global_episodes, load_path="dataset/dataset/"):
+				global_episodes, load_path="dataset/dataset/", model_path="./model"):
 		"""
 		Initializes a new agent
 
@@ -22,6 +22,8 @@ class Agent:
 		"""
 
 		self.name = "agent_{0}".format(index)
+		self.model_path = model_path
+
 		self.local_env = Environment("env_{0}".format(index), load_path=load_path)
 		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
 									n_inputs_matching, n_actions_policy, trainer)
@@ -130,7 +132,7 @@ class Agent:
 		length = len(analysis)
 		return value_loss/length, policy_loss/length, entropy/length, loss/length
 
-	def train(self, sess, coord, lock):
+	def train(self, sess, coord, lock, saver):
 		"""
 		Trains the agent
 
@@ -189,7 +191,7 @@ class Agent:
 						summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
 						summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
 
-						self.summary_writer.add_summary(summary, episode_count)
+						self.summary_writer.add_summary(summary, local_episodes)
 						self.summary_writer.flush()
 					if self.name == 'worker_0':
 						sess.run(self.increment)
