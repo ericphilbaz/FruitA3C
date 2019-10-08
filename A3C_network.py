@@ -18,6 +18,8 @@ class A3C_Network:
 			number of matching inputs
 		n_actions_policy : int
 			number of policy outputs
+		trainer : tf.trainer
+			trainer of the network
 		"""
 
 		self.scope = scope
@@ -62,6 +64,7 @@ class A3C_Network:
 
 			if scope != "global_net":
 
+				# training part
 				self.actions = tf.placeholder(shape=[None], dtype=tf.int32)
 				self.actions_onehot = tf.one_hot(self.actions, n_actions_policy, dtype=tf.float32)
 				self.target_value = tf.placeholder(shape=[None], dtype=tf.float32)

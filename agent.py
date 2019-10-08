@@ -11,7 +11,7 @@ class Agent:
 
 	def __init__(self, index, n_inputs_policy,
 				n_inputs_matching, n_actions_policy, trainer,
-				load_path="dataset/dataset/"):
+				global_episodes, load_path="dataset/dataset/"):
 		"""
 		Initializes a new agent
 
@@ -28,6 +28,8 @@ class Agent:
 
 		self.actions_available = ["new", "match", "wait"]
 
+		self.global_episodes = global_episodes
+		self.increment = self.global_episodes.assign_add(1)
 		self.summary_writer = tf.summary.FileWriter("./graphs/train_"+str(self.name))
 
 	def find_match(self, sess, defect):
@@ -142,6 +144,9 @@ class Agent:
 			used to properly load a new fruit by correctly syncing the local environment
 		"""
 
+		print("Starting", self.name)
+		local_episodes = sess.run(self.global_episodes)
+
 		with sess.as_default(), sess.graph.as_default():
 			while not coord.should_stop():
 
@@ -172,3 +177,20 @@ class Agent:
 						fruit_reward += reward
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
+					if local_episodes % 5 == 0 and local_episodes != 0:
+						if local_episodes % 10 == 0 and self.name == "agent_0":
+							saver.save(sess,
+										self.model_path+"/model"+str(local_episodes)+".cptk")
+							print("Model saved")
+
+						summary = tf.Summary()
+						summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))
+						summary.value.add(tag='Losses/Policy Loss', simple_value=float(p_l))
+						summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
+						summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
+
+						self.summary_writer.add_summary(summary, episode_count)
+						self.summary_writer.flush()
+					if self.name == 'worker_0':
+						sess.run(self.increment)
+				local_episodes += 1
