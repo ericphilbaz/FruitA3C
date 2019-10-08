@@ -1,5 +1,6 @@
 from src.environment import Environment
 from A3C_network import A3C_Network
+from src.utils import discount
 import numpy as np
 
 class Agent:
@@ -102,10 +103,13 @@ class Agent:
 		rewards = analysis[:, 3]
 		values = analysis[:, 4]
 
+		rewards_plus = np.asarray(rewards.tolist() + [0.0])
+		discounted_rewards = discount(rewards_plus, gamma)[:-1]
+
 		values_plus = np.asarray(values.tolist() + [0.0])
 		advantages = rewards + gamma * values_plus[1:] - values_plus[:-1]
 
-		feed_dict = {self.local_net.target_value:rewards,
+		feed_dict = {self.local_net.target_value:discounted_rewards,
 					self.local_net.input_vector:np.vstack(states),
 					self.local_net.matching_vector:np.vstack(matching),
 					self.local_net.actions:actions,
@@ -155,7 +159,8 @@ class Agent:
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 
-						fruit_analysis.append([state, defect-defect_matched, action_idx, reward, value])
+						fruit_analysis.append([state, defect-defect_matched, action_idx,
+																				reward, value])
 						fruit_values.append(value)
 						fruit_reward += reward
 
