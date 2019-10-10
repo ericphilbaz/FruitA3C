@@ -1,5 +1,5 @@
 from src.environment import Environment
-from A3C_network import A3C_Network
+from src.A3C_network import A3C_Network
 from src.utils import discount
 import numpy as np
 import tensorflow as tf
