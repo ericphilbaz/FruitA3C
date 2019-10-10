@@ -15,11 +15,11 @@ with tf.device('/gpu:0'):
 	global_episodes = tf.Variable(0, dtype=tf.int32,name='global_episodes',trainable=False)
 	trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
 
-	global_env = Environment(load_path=load_path, final_index=100)
+	global_env = Environment(load_path=load_path, final_index=50)
 	global_net = A3C_Network()
 
-	# n_agents = 1
-	n_agents = multiprocessing.cpu_count()
+	n_agents = 1
+	# n_agents = multiprocessing.cpu_count()
 
 	agents = []
 	for i in range(n_agents):

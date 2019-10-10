@@ -193,6 +193,6 @@ class Agent:
 
 						self.summary_writer.add_summary(summary, local_episodes)
 						self.summary_writer.flush()
-					if self.name == 'worker_0':
+					if self.name == 'agent_0':
 						sess.run(self.increment)
 				local_episodes += 1
