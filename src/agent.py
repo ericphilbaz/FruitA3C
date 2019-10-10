@@ -179,7 +179,7 @@ class Agent:
 						fruit_reward += reward
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
-					if local_episodes % 5 == 0 and local_episodes != 0:
+					if local_episodes % 2 == 0 and local_episodes != 0:
 						if local_episodes % 10 == 0 and self.name == "agent_0":
 							saver.save(sess,
 										self.model_path+"/model"+str(local_episodes)+".cptk")
@@ -193,6 +193,7 @@ class Agent:
 
 						self.summary_writer.add_summary(summary, local_episodes)
 						self.summary_writer.flush()
-					if self.name == 'agent_0':
-						sess.run(self.increment)
+
+				if self.name == 'agent_0':
+					sess.run(self.increment)
 				local_episodes += 1
