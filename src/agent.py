@@ -94,6 +94,15 @@ class Agent:
 		return self.actions_available[action_idx], action_idx
 
 	def value(self, sess, state, defect, defect_matched):
+		"""
+		Evaluates the value
+
+		Parameters
+		----------
+		sess : tf.Session()
+			TensorFlow session used to run the function
+
+		"""
 
 		value = sess.run(self.local_net.value,
 						feed_dict={self.local_net.input_vector:state,
@@ -102,6 +111,23 @@ class Agent:
 		return value
 
 	def update(self, sess, analysis, gamma):
+		"""
+		Updates the global network by applying gradients
+
+		Parameters
+		----------
+		sess : tf.Session()
+			TensorFlow session used to run the function
+		analysis : array
+			array of parameters used to run the function
+		gamma : float
+			discount parameter for reinforcement learning
+
+		Returns
+		-------
+		value_loss/length, policy_loss/length, entropy/length, loss/length : float
+			parameters used to evaluate the model
+		"""
 		
 		analysis = np.array(analysis)
 
@@ -180,10 +206,6 @@ class Agent:
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
 					if local_episodes % 2 == 0 and local_episodes != 0:
-						if local_episodes % 10 == 0 and self.name == "agent_0":
-							saver.save(sess,
-										self.model_path+"/model"+str(local_episodes)+".cptk")
-							print("Model saved")
 
 						summary = tf.Summary()
 						summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))
@@ -193,6 +215,11 @@ class Agent:
 
 						self.summary_writer.add_summary(summary, local_episodes)
 						self.summary_writer.flush()
+
+						if local_episodes % 10 == 0 and self.name == "agent_0":
+							saver.save(sess,
+										self.model_path+"/model"+str(local_episodes)+".cptk")
+							print("Model saved")
 
 				if self.name == 'agent_0':
 					sess.run(self.increment)

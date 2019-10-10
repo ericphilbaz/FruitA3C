@@ -108,9 +108,19 @@ class Environment:
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
 
 	def get_loss(self):
+		"""
+		Calculates loss function for the fruit
 
+		Returns
+		loss : float
+			loss evaluated
+		"""
+
+		# difference between the optimal number of uuids per key and the actual number of uuids
 		keys_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
+		# difference between the optimal number of keys per uuid and the actual number of keys
 		uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
+		# difference between the optimal total number of uuids the actual total number of uuids
 		difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
 		
 		loss = keys_loss + uuids_loss + difference_loss
@@ -118,6 +128,13 @@ class Environment:
 		return loss
 
 	def get_reward(self):
+		"""
+		Calculates reward for the action
+
+		Returns
+		reward : float
+			difference with the previous loss
+		"""
 
 		loss = self.get_loss()
 
