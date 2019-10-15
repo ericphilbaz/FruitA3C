@@ -184,7 +184,7 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					print(self.local_env.fruit.index)
+					print(self.name, local_episodes ,self.local_env.fruit.index)
 
 					fruit_analysis = []
 					fruit_values = []
@@ -198,6 +198,8 @@ class Agent:
 						value = self.value(sess, state, defect, defect_matched)
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						reward = self.local_env.apply_action(action, defect, defect_matched)
+
+						# print(defect.index, defect_matched.index, action, reward)
 
 						fruit_analysis.append([state, defect-defect_matched, action_idx,
 																				reward, value])

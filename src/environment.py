@@ -127,7 +127,7 @@ class Environment:
 
 		return loss
 
-	def get_reward(self):
+	def get_reward(self, bonus):
 		"""
 		Calculates reward for the action
 
@@ -137,8 +137,7 @@ class Environment:
 		"""
 
 		loss = self.get_loss()
-
-		reward = self.loss - loss
+		reward = self.loss - loss + bonus - 1
 		self.loss = loss
 
 		return reward
@@ -158,13 +157,22 @@ class Environment:
 		"""
 		uuid = uuid4()
 		identified = 0
+		bonus = 0
 
 		if action is "new":
+			if defect_matched.index == defect.index:
+				bonus -= 1
+			# else:
+			# 	bonus += 1
 			self.answers_dict[defect.index].add(uuid)
 			self.uuids_dict[uuid] = set([defect.index])
 			defect.uuid = uuid
 			identified = 1
 		elif action is "match":
+			if defect_matched.index != defect.index:
+				bonus -= 1
+			# else:
+			# 	bonus += 1
 			if defect_matched.uuid:
 				self.answers_dict[defect.index].add(defect_matched.uuid)
 				self.uuids_dict[defect_matched.uuid].add(defect.index)
@@ -179,8 +187,8 @@ class Environment:
 				defect.uuid = defect_matched.uuid
 				identified = 2 if defect != defect_matched else 1
 		else:
-			pass
+			bonus += 1
 
 		self.fruit.defects_identified += identified
-		reward = self.get_reward()
+		reward = self.get_reward(identified+bonus)
 		return reward
