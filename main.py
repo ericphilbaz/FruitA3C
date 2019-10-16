@@ -9,56 +9,74 @@ import multiprocessing, threading
 
 load_path = "dataset/dataset/"
 model_path = './model'
-load_model = True
+load_model = False
 
-starting_index = 60
-final_index = 120
+# n_agents = 1
+n_agents = multiprocessing.cpu_count()
 
-with tf.device('/gpu:0'):
-	global_episodes = tf.Variable(starting_index, dtype=tf.int32,
-								name='global_episodes',trainable=False)
-	trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
+starting_index = 0
+final_index = 256
+batch = 32
 
-	global_env = Environment(load_path=load_path,
-							starting_index=starting_index, final_index=final_index)
-	global_net = A3C_Network()
+def run(n_agents, load_path, model_path, starting_index, final_index, load_model):
 
-	n_agents = 1
-	n_agents = multiprocessing.cpu_count()
+	with tf.device('/gpu:0'):
+		global_episodes = tf.Variable(starting_index, dtype=tf.int32,
+									name='global_episodes',trainable=False)
+		trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
 
-	agents = []
-	for i in range(n_agents):
-		agents.append(Agent(i, global_net.n_inputs_policy, global_net.n_inputs_matching,
-							global_net.n_actions_policy, trainer, global_episodes,
-							load_path, model_path))
+		global_env = Environment(load_path=load_path,
+								starting_index=starting_index, final_index=final_index)
+		global_net = A3C_Network()
 
-	lock = threading.Lock()
-	saver = tf.train.Saver(max_to_keep=5)
+		agents = []
+		for i in range(n_agents):
+			agents.append(Agent(i, global_net.n_inputs_policy, global_net.n_inputs_matching,
+								global_net.n_actions_policy, trainer, global_episodes,
+								load_path, model_path))
+
+		lock = threading.Lock()
+		saver = tf.train.Saver(max_to_keep=5)
 
 
-with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-	
-	coord = tf.train.Coordinator()
+	with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
+		
+		coord = tf.train.Coordinator()
 
-	if load_model == True:
-		print ('Loading Model...')
-		ckpt = tf.train.get_checkpoint_state(model_path)
-		saver.restore(sess,ckpt.model_checkpoint_path)
-		sess.run(global_env.final_index.assign(final_index))
-	else:
-		sess.run(tf.global_variables_initializer())
+		if load_model == True:
+			print ('Loading Model...')
+			ckpt = tf.train.get_checkpoint_state(model_path)
+			saver.restore(sess,ckpt.model_checkpoint_path)
+			sess.run(global_env.final_index.assign(final_index))
+		else:
+			sess.run(tf.global_variables_initializer())
 
-	agents_threads = []
-	for agent in agents:
-		agent_train = lambda: agent.train(sess, coord, lock, saver)
-		t = threading.Thread(target=(agent_train))
-		t.start()
-		agents_threads.append(t)
+		agents_threads = []
+		for agent in agents:
+			agent_train = lambda: agent.train(sess, coord, lock, saver)
+			t = threading.Thread(target=(agent_train))
+			t.start()
+			agents_threads.append(t)
 
-	for t in agents_threads:
-		t.join()
+		for t in agents_threads:
+			t.join()
 
-	writer = tf.summary.FileWriter('./graphs', sess.graph)
-	ep = sess.run(global_episodes)
-	print(ep)
-	saver.save(sess, model_path + "/model" + str(ep) + ".cptk")
+		writer = tf.summary.FileWriter('./graphs', sess.graph)
+		ep = sess.run(global_episodes)
+		saver.save(sess, model_path + "/model" + str(ep) + ".cptk")
+
+def main():
+	global load_model
+
+	for i in range(starting_index, final_index, batch):
+
+		p = multiprocessing.Process(target=(run), args=(n_agents, load_path,
+														model_path, i,
+														i+batch, load_model))
+		p.start()
+		p.join()
+
+		load_model = True
+
+if __name__ == "__main__":
+	main()
