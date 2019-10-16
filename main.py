@@ -9,16 +9,21 @@ import multiprocessing, threading
 
 load_path = "dataset/dataset/"
 model_path = './model'
-load_model = False
+load_model = True
+
+starting_index = 60
+final_index = 120
 
 with tf.device('/gpu:0'):
-	global_episodes = tf.Variable(0, dtype=tf.int32,name='global_episodes',trainable=False)
+	global_episodes = tf.Variable(starting_index, dtype=tf.int32,
+								name='global_episodes',trainable=False)
 	trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
 
-	global_env = Environment(load_path=load_path, final_index=200)
+	global_env = Environment(load_path=load_path,
+							starting_index=starting_index, final_index=final_index)
 	global_net = A3C_Network()
 
-	# n_agents = 2
+	n_agents = 1
 	n_agents = multiprocessing.cpu_count()
 
 	agents = []
@@ -39,6 +44,7 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 		print ('Loading Model...')
 		ckpt = tf.train.get_checkpoint_state(model_path)
 		saver.restore(sess,ckpt.model_checkpoint_path)
+		sess.run(global_env.final_index.assign(final_index))
 	else:
 		sess.run(tf.global_variables_initializer())
 
@@ -53,3 +59,6 @@ with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 		t.join()
 
 	writer = tf.summary.FileWriter('./graphs', sess.graph)
+	ep = sess.run(global_episodes)
+	print(ep)
+	saver.save(sess, model_path + "/model" + str(ep) + ".cptk")

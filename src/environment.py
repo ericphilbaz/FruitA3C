@@ -30,7 +30,7 @@ class Environment:
 									name='load_path')
 
 		with tf.variable_scope(scope):
-			self.index = tf.Variable(starting_index-1, dtype=tf.int64,
+			self.index = tf.Variable(starting_index, dtype=tf.int64,
 									name='index', trainable=False)
 			self.final_index = tf.Variable(final_index, dtype=tf.int64,
 									name='final_index', trainable=False)
@@ -65,7 +65,7 @@ class Environment:
 		Environment.sync(sess, self.scope)
 		self.fruit = None
 
-		index = sess.run(self.index)+1
+		index = sess.run(self.index)
 		final_index = sess.run(self.final_index)
 		load_path = sess.run(self.load_path).decode("utf-8")
 		defects_thresholds = sess.run(self.defects_thresholds)
@@ -77,7 +77,7 @@ class Environment:
 					index += 1
 					fruit = Fruit(index, load_path, defects_thresholds)
 
-				sess.run(self.index.assign(index))
+				sess.run(self.index.assign(index+1))
 				Environment.sync(sess, "global_env", self.scope)
 
 				self.fruit = fruit
