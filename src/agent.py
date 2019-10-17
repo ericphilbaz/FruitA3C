@@ -11,7 +11,7 @@ class Agent:
 
 	def __init__(self, index, n_inputs_policy,
 				n_inputs_matching, n_actions_policy, trainer,
-				global_episodes, load_path="dataset/dataset/", model_path="./model"):
+				load_path="dataset/dataset/", model_path="./model"):
 		"""
 		Initializes a new agent
 
@@ -30,8 +30,10 @@ class Agent:
 
 		self.actions_available = ["new", "match", "wait"]
 
-		self.global_episodes = global_episodes
-		self.increment = self.global_episodes.assign_add(1)
+		with tf.variable_scope(self.name):
+			self.episodes = tf.Variable(0, dtype=tf.int64,
+										name='episodes', trainable=False)
+
 		self.summary_writer = tf.summary.FileWriter("./graphs/train_"+str(self.name))
 
 	def find_match(self, sess, defect):
@@ -172,8 +174,7 @@ class Agent:
 			used to properly load a new fruit by correctly syncing the local environment
 		"""
 
-		# print("Starting", self.name)
-		local_episodes = sess.run(self.global_episodes)
+		episodes = sess.run(self.episodes)
 
 		with sess.as_default(), sess.graph.as_default():
 			while not coord.should_stop():
@@ -184,7 +185,7 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					# print(self.name, local_episodes ,self.local_env.fruit.index)
+					# print(self.name, episodes ,self.local_env.fruit.index)
 
 					fruit_analysis = []
 					fruit_values = []
@@ -210,7 +211,7 @@ class Agent:
 					fruit_values_avg = np.mean(fruit_values)
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
-					if local_episodes % 2 == 0 and local_episodes != 0:
+					if episodes % 2 == 0 and episodes != 0:
 
 						summary = tf.Summary()
 						summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))
@@ -220,9 +221,8 @@ class Agent:
 						summary.value.add(tag='Performances/Average Fruit Reward', simple_value=float(fruit_reward_norm))
 						summary.value.add(tag='Performances/Value', simple_value=float(fruit_values_avg))
 
-						self.summary_writer.add_summary(summary, local_episodes)
+						self.summary_writer.add_summary(summary, episodes)
 						self.summary_writer.flush()
 
-					if self.name == 'agent_0':
-						sess.run(self.increment)
-				local_episodes += 1
+					episodes += 1
+			sess.run(self.episodes.assign(episodes))
