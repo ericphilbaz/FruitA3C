@@ -10,17 +10,17 @@ import multiprocessing, threading
 import time, datetime
 from math import ceil
 
-# load_path = "dataset/dataset/"
-load_path = "dataset/sample/"
+load_path = "dataset/dataset/"
+# load_path = "dataset/sample/"
 model_path = './model'
 load_model = False
 
-# n_agents = 1
+# n_agents = 4
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 35
-batch = 8
+final_index = 256
+batch = 64
 
 def run(n_agents, load_path, model_path, starting_index, final_index, load_model):
 

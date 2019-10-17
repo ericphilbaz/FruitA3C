@@ -206,6 +206,9 @@ class Agent:
 						fruit_values.append(value)
 						fruit_reward += reward
 
+					fruit_reward_norm = fruit_reward/len(self.local_env.fruit.defects)
+					fruit_values_avg = np.mean(fruit_values)
+
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
 					if local_episodes % 2 == 0 and local_episodes != 0:
 
@@ -214,6 +217,8 @@ class Agent:
 						summary.value.add(tag='Losses/Policy Loss', simple_value=float(p_l))
 						summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
 						summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
+						summary.value.add(tag='Performances/Average Fruit Reward', simple_value=float(fruit_reward_norm))
+						summary.value.add(tag='Performances/Value', simple_value=float(fruit_values_avg))
 
 						self.summary_writer.add_summary(summary, local_episodes)
 						self.summary_writer.flush()
