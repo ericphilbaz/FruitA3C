@@ -7,7 +7,10 @@ from src.A3C_network import A3C_Network
 from src.agent import Agent
 import multiprocessing, threading
 
-load_path = "dataset/dataset/"
+import time, datetime
+from math import ceil
+
+# load_path = "dataset/dataset/"
 load_path = "dataset/sample/"
 model_path = './model'
 load_model = False
@@ -16,8 +19,8 @@ load_model = False
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 10000
-batch = 64
+final_index = 35
+batch = 8
 
 def run(n_agents, load_path, model_path, starting_index, final_index, load_model):
 
@@ -45,7 +48,7 @@ def run(n_agents, load_path, model_path, starting_index, final_index, load_model
 		coord = tf.train.Coordinator()
 
 		if load_model == True:
-			print ('Loading Model...')
+			# print ('Loading Model...')
 			ckpt = tf.train.get_checkpoint_state(model_path)
 			saver.restore(sess,ckpt.model_checkpoint_path)
 			sess.run(global_env.final_index.assign(final_index))
@@ -65,12 +68,23 @@ def run(n_agents, load_path, model_path, starting_index, final_index, load_model
 		writer = tf.summary.FileWriter('./graphs', sess.graph)
 		ep = sess.run(global_episodes)
 		saver.save(sess, model_path + "/model" + str(ep) + ".cptk")
-		print("model saved")
+		# print("Model saved.")
 
 def main():
 	global load_model
 
+	total_batches = ceil(final_index/batch)
+	times = []
+	remaining_time = "unknown"
+
 	for i in range(starting_index, final_index, batch):
+		actual_batch = int(i/batch + 1)
+		remaining_batches = total_batches - actual_batch
+
+		print("Batch", actual_batch,
+			"over", total_batches,
+			"total batches, estimated time left:", str(remaining_time).split(".")[0])
+		start = time.time()
 
 		p = multiprocessing.Process(target=(run), args=(n_agents, load_path,
 														model_path, i,
@@ -78,6 +92,12 @@ def main():
 		p.start()
 		p.join()
 
+		times.append(time.time() - start)
+		if remaining_batches:
+			mean_time = sum(times)/len(times)
+			remaining_time = datetime.timedelta(seconds=remaining_batches*mean_time)
+		else:
+			print("Training finished.")
 		load_model = True
 
 if __name__ == "__main__":

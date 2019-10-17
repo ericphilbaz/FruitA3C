@@ -172,7 +172,7 @@ class Agent:
 			used to properly load a new fruit by correctly syncing the local environment
 		"""
 
-		print("Starting", self.name)
+		# print("Starting", self.name)
 		local_episodes = sess.run(self.global_episodes)
 
 		with sess.as_default(), sess.graph.as_default():
@@ -184,7 +184,7 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					print(self.name, local_episodes ,self.local_env.fruit.index)
+					# print(self.name, local_episodes ,self.local_env.fruit.index)
 
 					fruit_analysis = []
 					fruit_values = []
