@@ -8,6 +8,7 @@ from src.agent import Agent
 import multiprocessing, threading
 
 load_path = "dataset/dataset/"
+load_path = "dataset/sample/"
 model_path = './model'
 load_model = False
 
@@ -15,8 +16,8 @@ load_model = False
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 256
-batch = 32
+final_index = 10000
+batch = 64
 
 def run(n_agents, load_path, model_path, starting_index, final_index, load_model):
 
@@ -64,6 +65,7 @@ def run(n_agents, load_path, model_path, starting_index, final_index, load_model
 		writer = tf.summary.FileWriter('./graphs', sess.graph)
 		ep = sess.run(global_episodes)
 		saver.save(sess, model_path + "/model" + str(ep) + ".cptk")
+		print("model saved")
 
 def main():
 	global load_model
