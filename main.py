@@ -19,7 +19,7 @@ load_model = False
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 10000
+final_index = 20000
 batch = 64
 
 def run(n_agents, load_path, model_path, starting_index, final_index, load_model):
@@ -78,7 +78,9 @@ def main():
 
 		print("Batch", actual_batch,
 			"over", total_batches,
-			"total batches, estimated time left:", str(remaining_time).split(".")[0])
+			"total batches, estimated time left:", str(remaining_time).split(".")[0],
+			end="\r", flush=True)
+
 		start = time.time()
 
 		p = multiprocessing.Process(target=(run), args=(n_agents, load_path,
@@ -86,8 +88,12 @@ def main():
 														i+batch, load_model))
 		p.start()
 		p.join()
-
+	
 		times.append(time.time() - start)
+
+		if len(times) > 20:	
+			del times[0]
+
 		if remaining_batches:
 			mean_time = sum(times)/len(times)
 			remaining_time = datetime.timedelta(seconds=remaining_batches*mean_time)
