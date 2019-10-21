@@ -201,8 +201,8 @@ class Agent:
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 
 						# print(defect.shot_name, defect.index,
-								# "matched with", defect_matched.shot_name, defect_matched.index
-								# action, reward)
+						# 		"matched with", defect_matched.shot_name, defect_matched.index,
+						# 		action, reward)
 
 						fruit_analysis.append([state, defect-defect_matched, action_idx,
 																				reward, value])
