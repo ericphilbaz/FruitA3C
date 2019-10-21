@@ -19,7 +19,7 @@ load_model = False
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 20000
+final_index = 22000
 batch = 64
 
 def run(n_agents, load_path, model_path, starting_index, final_index, load_model):

@@ -82,9 +82,11 @@ class Environment:
 
 				self.fruit = fruit
 
-				self.answers_dict = {key: set() for key in self.fruit.defects_indices}
-				self.uuids_dict = dict()
-				self.loss = self.get_loss()
+				self.indices_analyzed = set()
+
+				# self.answers_dict = {key: set() for key in self.fruit.defects_indices}
+				# self.uuids_dict = dict()
+				# self.loss = self.get_loss()
 				
 			except:
 				coord.request_stop()
@@ -107,40 +109,37 @@ class Environment:
 
 		return np.array([shots_progress, defects_progress, uuid_progress]).reshape((1, 3))
 
-	def get_loss(self):
+	def add_uuid(self, defect, defect_matched=None):
 		"""
-		Calculates loss function for the fruit
+		Adds uuid to the defect analyzed
+
+		Parameters
+		----------
+		defect : Defect
+			defect to apply action
+		defect_matched : Defect
+			defect matched
 
 		Returns
-		loss : float
-			loss evaluated
+		-------
+		identified : int
+			number of defects identified in the process
 		"""
 
-		# difference between the optimal number of uuids per key and the actual number of uuids
-		keys_loss = sum([abs(len(l)-1) for key, l in self.answers_dict.items()])
-		# difference between the optimal number of keys per uuid and the actual number of keys
-		uuids_loss = sum([abs(len(l)-1) for key, l in self.uuids_dict.items()])
-		# difference between the optimal total number of uuids the actual total number of uuids
-		difference_loss = abs(len(self.answers_dict)-len(self.uuids_dict))
-		
-		loss = keys_loss + uuids_loss + difference_loss
+		uuid = uuid4()
+		identified = 0
 
-		return loss
+		if not defect_matched:
+			defect.uuid = uuid
+			identified += 1
+		else:
+			if not defect_matched.uuid:
+				defect_matched.uuid = uuid
+				identified += 1
+			defect.uuid = defect_matched.uuid
+			identified += 1
 
-	def get_reward(self, bonus):
-		"""
-		Calculates reward for the action
-
-		Returns
-		reward : float
-			difference with the previous loss
-		"""
-
-		loss = self.get_loss()
-		reward = self.loss - loss + bonus - 1
-		self.loss = loss
-
-		return reward
+		return identified
 
 	def apply_action(self, action, defect, defect_matched):
 		"""
@@ -154,41 +153,34 @@ class Environment:
 			action to apply
 		defect_matched : Defect
 			defect matched
-		"""
-		uuid = uuid4()
-		identified = 0
-		bonus = 0
 
-		if action is "new":
-			if defect_matched.index == defect.index:
-				bonus -= 1
-			# else:
-			# 	bonus += 1
-			self.answers_dict[defect.index].add(uuid)
-			self.uuids_dict[uuid] = set([defect.index])
-			defect.uuid = uuid
-			identified = 1
+		Returns
+		-------
+		reward : int
+			reward for the applied action
+		"""
+
+		if action is "wait":
+			reward = 0
+			identified = 0
 		elif action is "match":
-			if defect_matched.index != defect.index:
-				bonus -= 1
-			# else:
-			# 	bonus += 1
-			if defect_matched.uuid:
-				self.answers_dict[defect.index].add(defect_matched.uuid)
-				self.uuids_dict[defect_matched.uuid].add(defect.index)
-				defect.uuid = defect_matched.uuid
-				identified = 1
+			if defect.index == defect_matched.index:
+				reward = +1
 			else:
-				self.answers_dict[defect_matched.index].add(uuid)
-				self.uuids_dict[uuid] = set([defect_matched.index])
-				defect_matched.uuid = uuid
-				self.answers_dict[defect.index].add(defect_matched.uuid)
-				self.uuids_dict[defect_matched.uuid].add(defect.index)
-				defect.uuid = defect_matched.uuid
-				identified = 2 if defect != defect_matched else 1
-		else:
-			bonus += 1
+				reward = -1
+			self.indices_analyzed.add(defect.index)
+			identified = self.add_uuid(defect, defect_matched)
+		elif action is "new":
+			if defect.index == defect_matched.index:
+				reward = -1
+			else:
+				if defect.index in self.indices_analyzed:
+					reward = -1
+				else:
+					reward = +1
+			self.indices_analyzed.add(defect.index)
+			identified = self.add_uuid(defect)
 
 		self.fruit.defects_identified += identified
-		reward = self.get_reward(identified+bonus)
+
 		return reward
