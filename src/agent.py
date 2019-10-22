@@ -34,8 +34,6 @@ class Agent:
 			self.episodes = tf.Variable(0, dtype=tf.int64,
 										name='episodes', trainable=False)
 
-		self.summary_writer = tf.summary.FileWriter("./graphs/train_"+str(self.name))
-
 	def find_match(self, sess, defect):
 		"""
 		Find the most matching defect based on the matching result
@@ -174,6 +172,7 @@ class Agent:
 			used to properly load a new fruit by correctly syncing the local environment
 		"""
 
+		self.summary_writer = tf.summary.FileWriter("./graphs/train_"+str(self.name))
 		episodes = sess.run(self.episodes)
 
 		with sess.as_default(), sess.graph.as_default():

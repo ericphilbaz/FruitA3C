@@ -7,7 +7,7 @@ from src.A3C_network import A3C_Network
 from src.agent import Agent
 import multiprocessing, threading
 
-def run(load_path, model_path, index):
+def run(load_path, model_path, index, load_model):
 
 	with tf.device('/gpu:0'):
 		trainer = tf.train.AdamOptimizer(learning_rate=1e-4)
@@ -23,10 +23,13 @@ def run(load_path, model_path, index):
 		
 		coord = tf.train.Coordinator()
 
-		ckpt = tf.train.get_checkpoint_state(model_path)
-		saver.restore(sess, ckpt.model_checkpoint_path)
-		sess.run(global_env.index.assign(index))
-		sess.run(global_env.final_index.assign(index+1))
+		if load_model:
+			ckpt = tf.train.get_checkpoint_state(model_path)
+			saver.restore(sess, ckpt.model_checkpoint_path)
+			sess.run(global_env.index.assign(index))
+			sess.run(global_env.final_index.assign(index+1))
+		else:
+			sess.run(tf.global_variables_initializer())
 
 		agent_test = lambda: agent.test(sess, coord)
 		t = threading.Thread(target=(agent_test))
