@@ -41,7 +41,7 @@ def run_batch(n_agents, load_path, model_path, starting_index, final_index, load
 
 		agents_threads = []
 		for agent in agents:
-			agent_train = lambda: agent.train(sess, coord, lock, saver)
+			agent_train = lambda: agent.train(sess, coord, lock)
 			t = threading.Thread(target=(agent_train))
 			t.start()
 			agents_threads.append(t)
@@ -86,5 +86,6 @@ def run(n_agents, load_path, model_path, starting_index, final_index, batch, loa
 			mean_time = sum(times)/len(times)
 			remaining_time = datetime.timedelta(seconds=remaining_batches*mean_time)
 		else:
+			print()
 			print("Training finished.")
 		load_model = True

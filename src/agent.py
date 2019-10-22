@@ -9,7 +9,7 @@ class Agent:
 	Used to implement the A3C algorithm
 	"""
 
-	def __init__(self, index, n_inputs_policy,
+	def __init__(self, n_agent, n_inputs_policy,
 				n_inputs_matching, n_actions_policy, trainer,
 				load_path="dataset/dataset/", model_path="./model"):
 		"""
@@ -17,15 +17,15 @@ class Agent:
 
 		Parameters
 		----------
-		index : int
+		n_agent : int
 			used to set up the agent name
 		"""
 
-		self.name = "agent_{0}".format(index)
+		self.name = "agent_{0}".format(n_agent)
 		self.model_path = model_path
 
-		self.local_env = Environment("env_{0}".format(index), load_path=load_path)
-		self.local_net = A3C_Network("net_{0}".format(index), n_inputs_policy,
+		self.local_env = Environment("env_{0}".format(n_agent), load_path=load_path)
+		self.local_net = A3C_Network("net_{0}".format(n_agent), n_inputs_policy,
 									n_inputs_matching, n_actions_policy, trainer)
 
 		self.actions_available = ["new", "match", "wait"]
@@ -160,7 +160,7 @@ class Agent:
 		length = len(analysis)
 		return value_loss/length, policy_loss/length, entropy/length, loss/length
 
-	def train(self, sess, coord, lock, saver):
+	def train(self, sess, coord, lock):
 		"""
 		Trains the agent
 
@@ -185,11 +185,10 @@ class Agent:
 				lock.release()
 				
 				if self.local_env.fruit is not None:
-					# print(self.name, episodes ,self.local_env.fruit.index)
 
 					fruit_analysis = []
 					fruit_values = []
-					fruit_reward = 0
+					fruit_total_reward = 0
 
 					for defect in self.local_env.fruit:
 
@@ -200,19 +199,16 @@ class Agent:
 						action, action_idx = self.policy(sess, state, defect, defect_matched)
 						reward = self.local_env.apply_action(action, defect, defect_matched)
 
-						# print(defect.shot_name, defect.index,
-						# 		"matched with", defect_matched.shot_name, defect_matched.index,
-						# 		action, reward)
-
 						fruit_analysis.append([state, defect-defect_matched, action_idx,
 																				reward, value])
 						fruit_values.append(value)
-						fruit_reward += reward
+						fruit_total_reward += reward
 
-					fruit_reward_norm = fruit_reward/len(self.local_env.fruit.defects)
-					fruit_values_avg = np.mean(fruit_values)
+					fruit_avg_reward = fruit_total_reward/self.local_env.fruit.defects_tot
+					fruit_avg_values = np.mean(fruit_values)
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
+
 					if episodes % 2 == 0 and episodes != 0:
 
 						summary = tf.Summary()
@@ -220,11 +216,55 @@ class Agent:
 						summary.value.add(tag='Losses/Policy Loss', simple_value=float(p_l))
 						summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
 						summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
-						summary.value.add(tag='Performances/Average Fruit Reward', simple_value=float(fruit_reward_norm))
-						summary.value.add(tag='Performances/Value', simple_value=float(fruit_values_avg))
+						summary.value.add(tag='Performances/Fruit Average Reward', simple_value=float(fruit_avg_reward))
+						summary.value.add(tag='Performances/Fruit Average Value', simple_value=float(fruit_avg_values))
 
 						self.summary_writer.add_summary(summary, episodes)
 						self.summary_writer.flush()
 
 					episodes += 1
 			sess.run(self.episodes.assign(episodes))
+
+	def test(self, sess, coord):
+
+		with sess.as_default(), sess.graph.as_default():
+			while not coord.should_stop():
+
+				self.local_net.sync(sess)
+				self.local_env.load_fruit(sess, coord)
+				
+				if self.local_env.fruit is not None:
+
+					print("Running test on fruit number", self.local_env.fruit.index)
+
+					fruit_analysis = []
+					fruit_values = []
+					fruit_total_reward = 0
+
+					for defect in self.local_env.fruit:
+
+						defect_matched = self.find_match(sess, defect)
+						state = self.local_env.get_state()
+
+						value = self.value(sess, state, defect, defect_matched)
+						action, action_idx = self.policy(sess, state, defect, defect_matched)
+						reward = self.local_env.apply_action(action, defect, defect_matched)
+
+						fruit_analysis.append([state, defect-defect_matched, action_idx,
+																				reward, value])
+						fruit_values.append(value)
+						fruit_total_reward += reward
+
+						print("############################################################")
+						print("Defect", defect.index,
+							"of shot", defect.shot_name,
+							"matched with defect", defect_matched.index,
+							"of shot", defect_matched.shot_name)
+						print("Action applied is", "\""+action+"\"",
+							"with reward", reward)
+
+					fruit_avg_reward = fruit_total_reward/self.local_env.fruit.defects_tot
+					fruit_avg_values = np.mean(fruit_values)
+
+					print()
+					print("Fruit average reward is:", fruit_avg_reward)
