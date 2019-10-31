@@ -28,7 +28,8 @@ class Agent:
 		self.local_net = A3C_Network("net_{0}".format(n_agent), n_inputs_policy,
 									n_inputs_matching, n_actions_policy, trainer)
 
-		self.actions_available = ["new", "match", "wait"]
+		# self.actions_available = ["new", "match", "wait"]
+		self.actions_available = ["new", "match"]
 
 		with tf.variable_scope(self.name):
 			self.episodes = tf.Variable(0, dtype=tf.int64,
@@ -208,7 +209,7 @@ class Agent:
 
 					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
 
-					if episodes % 2 == 0 and episodes != 0:
+					if episodes % 8 == 0 and episodes != 0:
 
 						summary = tf.Summary()
 						summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))

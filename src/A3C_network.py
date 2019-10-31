@@ -4,7 +4,7 @@ from src.utils import normalized_columns_initializer
 class A3C_Network:
 
 	def __init__(self, scope="global_net", n_inputs_policy=3,
-				n_inputs_matching=3, n_actions_policy=3, trainer=None):
+				n_inputs_matching=3, n_actions_policy=2, trainer=None):
 		"""
 		Setting up the network
 

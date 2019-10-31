@@ -2,17 +2,17 @@ import src.train as train
 import src.test as test
 import multiprocessing
 
-load_path = "dataset/dataset/"
+load_path = "dataset/dataset2/"
 # load_path = "dataset/sample/"
 model_path = './model'
 
 # n_agents = 1
 n_agents = multiprocessing.cpu_count()
 
-starting_index = 64
-final_index = 128
-batch = 8
-load_model = True
+starting_index = 0
+final_index = 30000
+batch = 64
+load_model = False
 
 testing_index = 0
 

@@ -26,7 +26,7 @@ def run_batch(n_agents, load_path, model_path, starting_index, final_index, load
 								global_net.n_actions_policy, trainer, load_path, model_path))
 
 		lock = threading.Lock()
-		saver = tf.train.Saver(max_to_keep=5)
+		saver = tf.train.Saver(max_to_keep=1)
 
 	with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
 		
