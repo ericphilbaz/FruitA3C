@@ -2,9 +2,9 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import tensorflow as tf
 
-from src.environment import Environment
-from src.A3C_network import A3C_Network
-from src.agent import Agent
+from src.model.environment import Environment
+from src.model.A3C_network import A3C_Network
+from src.model.agent import Agent
 import multiprocessing, threading
 
 from math import ceil

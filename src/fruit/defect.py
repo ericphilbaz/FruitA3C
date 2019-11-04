@@ -49,10 +49,10 @@ class Defect:
 		noise = 0.01
 
 		delta_x = 1 - np.abs(self.x_center - defect.x_center)/self.shot_sizes[1] \
-				+ (noise if np.random.rand() > 0.5 else -noise)
+				+ noise*(2*np.random.rand()-1)
 		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0] \
-				+ (noise if np.random.rand() > 0.5 else -noise)
+				+ noise*(2*np.random.rand()-1)
 		delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0]) \
-				+ (noise if np.random.rand() > 0.5 else -noise)
+				+ noise*(2*np.random.rand()-1)
 
 		return np.array([delta_x, delta_y, delta_area]).reshape((1, 3))

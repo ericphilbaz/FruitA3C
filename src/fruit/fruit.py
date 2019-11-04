@@ -1,6 +1,6 @@
 import tifffile
 import ast
-from src.defect import Defect
+from src.fruit.defect import Defect
 from skimage.measure import label, regionprops
 
 class Fruit:
