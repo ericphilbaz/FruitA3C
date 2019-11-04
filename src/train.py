@@ -64,10 +64,10 @@ def run(n_agents, load_path, model_path, starting_index, final_index, batch, loa
 		actual_batch = int(i/batch + 1)
 		remaining_batches = total_batches - actual_batch
 
-		# print("Batch", actual_batch,
-		# 	"over", total_batches,
-		# 	"total batches, estimated time left:", str(remaining_time).split(".")[0],
-		# 	end="\r", flush=True)
+		print("Batch", actual_batch,
+			"over", total_batches,
+			"total batches, estimated time left:", str(remaining_time).split(".")[0],
+			end="\r", flush=True)
 
 		start = time.time()
 
