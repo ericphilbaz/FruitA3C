@@ -30,13 +30,12 @@ class Defect:
 		self.uuid = None
 		self.index = index
 
-		self.bounding_box = props.bbox
 		self.area = props.area
 		self.perimeter = props.perimeter
-
-		self.x_center = (self.bounding_box[3] - self.bounding_box[1])/2
-		self.y_center = (self.bounding_box[2] - self.bounding_box[0])/2
+		self.y_center, self.x_center = props.centroid
 		self.circularity = (4*math.pi*self.area) / (self.perimeter*self.perimeter)
+		self.eccentricity = props.eccentricity
+		self.solidity = props.solidity
 
 	def __sub__(self, defect):
 		"""
@@ -57,9 +56,13 @@ class Defect:
 				+ noise*(2*np.random.rand()-1)
 		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0] \
 				+ noise*(2*np.random.rand()-1)
-		# delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0]) \
-		# 		+ noise*(2*np.random.rand()-1)
+
 		delta_circularity = 1 - np.abs(self.circularity - defect.circularity) \
 				+ noise*(2*np.random.rand()-1)
+		delta_eccentricity = 1 - np.abs(self.eccentricity - defect.eccentricity) \
+				+ noise*(2*np.random.rand()-1)
+		delta_solidity = 1 - np.abs(self.solidity - defect.solidity) \
+				+ noise*(2*np.random.rand()-1)
 
-		return np.array([delta_x, delta_y, delta_circularity]).reshape((1, 3))
+		delta = [delta_x, delta_y, delta_circularity, delta_eccentricity, delta_solidity]
+		return np.array(delta).reshape((1, 5))
