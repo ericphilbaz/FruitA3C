@@ -46,8 +46,13 @@ class Defect:
 			an array of differences, in absolute value, between 0 (different) and 1 (same)
 		"""
 
-		delta_x = 1 - np.abs(self.x_center - defect.x_center)/self.shot_sizes[1]
-		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0]
-		delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0])
+		noise = 0.01
+
+		delta_x = 1 - np.abs(self.x_center - defect.x_center)/self.shot_sizes[1] \
+				+ (noise if np.random.rand() > 0.5 else -noise)
+		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0] \
+				+ (noise if np.random.rand() > 0.5 else -noise)
+		delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0]) \
+				+ (noise if np.random.rand() > 0.5 else -noise)
 
 		return np.array([delta_x, delta_y, delta_area]).reshape((1, 3))

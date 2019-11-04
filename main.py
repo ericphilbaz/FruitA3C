@@ -10,8 +10,8 @@ model_path = './model'
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 30000
-batch = 64
+final_index = 128
+batch = 32
 load_model = False
 
 testing_index = 0
