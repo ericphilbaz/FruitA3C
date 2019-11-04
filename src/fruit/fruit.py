@@ -83,10 +83,13 @@ class Fruit:
 			answers = ast.literal_eval(tif.pages[0].tags["ImageDescription"].value)
 
 		defects = []
+		print()
 		for i, (shot, answers_list) in enumerate(zip(shots, answers)):
 			thresholds = shot < defects_thresholds[0]
 			labels = label(thresholds)
-			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, defect.bbox, defect.area, defect.perimeter, shot.shape) for defect_index, defect in zip(answers_list, regionprops(labels))]
+			properties = regionprops(labels)
+			print(properties)
+			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, shot.shape, defect.bbox, defect.area, defect.perimeter, ) for defect_index, defect in zip(answers_list, regionprops(labels))]
 			defects.append(defects_in_shot)
 
 		defects_indices = set(d.index for l in defects for d in l)

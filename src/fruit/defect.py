@@ -6,7 +6,7 @@ class Defect:
 	Defect object find on fruits
 	"""
 
-	def __init__(self, shot_name, index, bounding_box, area, perimeter, shot_sizes):
+	def __init__(self, shot_name, index, shot_sizes, bounding_box, area, perimeter):
 		"""
 		Instantiates Defect objects
 
@@ -35,6 +35,7 @@ class Defect:
 		# self.area = area
 		# self.perimeter = perimeter
 		self.circularity = (4*math.pi*area) / (perimeter*perimeter)
+		print(self.circularity)
 
 	def __sub__(self, defect):
 		"""
