@@ -1,5 +1,6 @@
 import numpy as np
 import math
+from src.fruit.utils import log10_trasform, sigmoid
 
 class Defect:
 	"""
@@ -32,10 +33,12 @@ class Defect:
 
 		self.area = props.area
 		self.perimeter = props.perimeter
+
 		self.y_center, self.x_center = props.centroid
 		self.circularity = (4*math.pi*self.area) / (self.perimeter*self.perimeter)
 		self.eccentricity = props.eccentricity
 		self.solidity = props.solidity
+		self.moments_hu = log10_trasform(props.moments_hu)
 
 	def __sub__(self, defect):
 		"""
@@ -63,6 +66,9 @@ class Defect:
 				+ noise*(2*np.random.rand()-1)
 		delta_solidity = 1 - np.abs(self.solidity - defect.solidity) \
 				+ noise*(2*np.random.rand()-1)
+		delta_hu = 1 - sigmoid(np.linalg.norm(self.moments_hu - defect.moments_hu)) \
+				+ noise*(2*np.random.rand()-1)
 
-		delta = [delta_x, delta_y, delta_circularity, delta_eccentricity, delta_solidity]
-		return np.array(delta).reshape((1, 5))
+		delta = [delta_x, delta_y, delta_circularity,
+				delta_eccentricity, delta_solidity, delta_hu]
+		return np.array(delta).reshape((1, 6))
