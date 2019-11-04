@@ -1,11 +1,12 @@
 import numpy as np
+import math
 
 class Defect:
 	"""
 	Defect object find on fruits
 	"""
 
-	def __init__(self, shot_name, index, bounding_box, area, shot_sizes):
+	def __init__(self, shot_name, index, bounding_box, area, perimeter, shot_sizes):
 		"""
 		Instantiates Defect objects
 
@@ -31,7 +32,9 @@ class Defect:
 
 		self.x_center = (bounding_box[3] - bounding_box[1])/2
 		self.y_center = (bounding_box[2] - bounding_box[0])/2
-		self.area = area
+		# self.area = area
+		# self.perimeter = perimeter
+		self.circularity = (4*math.pi*area) / (perimeter*perimeter)
 
 	def __sub__(self, defect):
 		"""
@@ -52,7 +55,9 @@ class Defect:
 				+ noise*(2*np.random.rand()-1)
 		delta_y = 1 - np.abs(self.y_center - defect.y_center)/self.shot_sizes[0] \
 				+ noise*(2*np.random.rand()-1)
-		delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0]) \
+		# delta_area = 1 - np.abs(self.area - defect.area)/(self.shot_sizes[1]*self.shot_sizes[0]) \
+		# 		+ noise*(2*np.random.rand()-1)
+		delta_circularity = 1 - np.abs(self.circularity - defect.circularity) \
 				+ noise*(2*np.random.rand()-1)
 
-		return np.array([delta_x, delta_y, delta_area]).reshape((1, 3))
+		return np.array([delta_x, delta_y, delta_circularity]).reshape((1, 3))

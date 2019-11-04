@@ -86,7 +86,7 @@ class Fruit:
 		for i, (shot, answers_list) in enumerate(zip(shots, answers)):
 			thresholds = shot < defects_thresholds[0]
 			labels = label(thresholds)
-			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, defect.bbox, defect.area, shot.shape) for defect_index, defect in zip(answers_list, regionprops(labels))]
+			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, defect.bbox, defect.area, defect.perimeter, shot.shape) for defect_index, defect in zip(answers_list, regionprops(labels))]
 			defects.append(defects_in_shot)
 
 		defects_indices = set(d.index for l in defects for d in l)
