@@ -29,38 +29,24 @@ class A3C_Network:
 
 		with tf.variable_scope(scope):
 
-			# matching part
-			self.matching_vector = tf.placeholder(name="matching_vector",
-												shape=[None, n_inputs_matching], dtype=tf.float32)
-
-			self.W_1m = tf.get_variable(name="W_1m", shape=[n_inputs_matching, 4],
-											initializer=tf.initializers.glorot_uniform())
-			self.layer_1m = tf.nn.relu(tf.matmul(self.matching_vector, self.W_1m,
-												name="matmul_1m"), name="layer_1m")
-
-			self.W_match = tf.get_variable(name="W_match", shape=[4, 1],
-											initializer=normalized_columns_initializer(0.01))
-			self.match = tf.math.sigmoid(tf.matmul(self.layer_1m, self.W_match,
-													name="matmul_match"), name="match")
-
-			# policy part
+			# policy net
 			self.input_vector = tf.placeholder(name="input_vector",
-												shape=[None, n_inputs_policy], dtype=tf.float32)
-			self.input_vector_extended = tf.concat([self.input_vector, self.match], 1)
+												shape=[None, n_inputs_policy+n_inputs_matching],
+												dtype=tf.float32)
 
-			self.W_1p = tf.get_variable(name="W_1p", shape=[n_inputs_policy+1, 4],
-											initializer=tf.initializers.glorot_uniform())
-			self.layer_1p = tf.nn.relu(tf.matmul(self.input_vector_extended, self.W_1p,
-												name="matmul_1p"), name="layer_1p")
+			self.W_1 = tf.get_variable(name="W_1", shape=[n_inputs_policy+n_inputs_matching, 4],
+										initializer=tf.initializers.glorot_uniform())
+			self.layer_1 = tf.nn.relu(tf.matmul(self.input_vector, self.W_1,
+												name="matmul_1"), name="layer_1")
 
 			self.W_policy = tf.get_variable(name="W_policy", shape=[4, n_actions_policy],
-									initializer=normalized_columns_initializer(0.01))
-			self.policy = tf.nn.softmax(tf.matmul(self.layer_1p, self.W_policy,
-												name="matmul_policy"), name="policy")
+											initializer=normalized_columns_initializer(0.01))
+			self.policy = tf.nn.softmax(tf.matmul(self.layer_1, self.W_policy,
+													name="matmul_policy"), name="policy")
 
 			self.W_value = tf.get_variable(name="W_value", shape=[4, 1],
-									initializer=normalized_columns_initializer(1.0))
-			self.value = tf.matmul(self.layer_1p, self.W_value, name="value")
+											initializer=normalized_columns_initializer(1.0))
+			self.value = tf.matmul(self.layer_1, self.W_value, name="value")
 
 			if scope != "global_net":
 
