@@ -42,6 +42,9 @@ class Defect:
 		self.solidity = props.solidity
 		self.moments_hu = log10_trasform(props.moments_hu)
 
+	def __eq__(self, defect):
+		return True if self.index == defect.index else False
+
 	def __sub__(self, defect):
 		"""
 		Used to return differences between two defects

@@ -140,7 +140,7 @@ class Environment:
 
 		return identified
 
-	def apply_action(self, action, defect, defect_matched):
+	def apply_action(self, action, defect, defect_to_match):
 		"""
 		Apply action to the defect currently analyzed
 
@@ -159,27 +159,40 @@ class Environment:
 			reward for the applied action
 		"""
 
-		if action is "wait":
-			reward = 0
-			identified = 0
-		elif action is "match":
-			if defect.index == defect_matched.index:
+		if action is "identical":
+			if defect == defect_to_match:
 				reward = +1
 			else:
 				reward = -1
-			self.indices_analyzed.add(defect.index)
-			identified = self.add_uuid(defect, defect_matched)
-		elif action is "new":
-			if defect.index == defect_matched.index:
+		elif action is "different":
+			if defect == defect_to_match:
 				reward = -1
 			else:
-				if defect.index in self.indices_analyzed:
-					reward = -1
-				else:
-					reward = +1
-			self.indices_analyzed.add(defect.index)
-			identified = self.add_uuid(defect)
+				reward = +1
+		else:
+			print("Something is wrong.")
 
-		self.fruit.defects_identified += identified
+		# if action is "wait":
+		# 	reward = 0
+		# 	identified = 0
+		# elif action is "match":
+		# 	if defect.index == defect_matched.index:
+		# 		reward = +1
+		# 	else:
+		# 		reward = -1
+		# 	self.indices_analyzed.add(defect.index)
+		# 	identified = self.add_uuid(defect, defect_matched)
+		# elif action is "new":
+		# 	if defect.index == defect_matched.index:
+		# 		reward = -1
+		# 	else:
+		# 		if defect.index in self.indices_analyzed:
+		# 			reward = -1
+		# 		else:
+		# 			reward = +1
+		# 	self.indices_analyzed.add(defect.index)
+		# 	identified = self.add_uuid(defect)
+
+		# self.fruit.defects_identified += identified
 
 		return reward

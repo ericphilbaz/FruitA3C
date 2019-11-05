@@ -190,9 +190,9 @@ class Agent:
 					for defect in self.local_env.fruit:
 
 						state = self.local_env.get_state()
-						shots_to_check = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
+						shots_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
 
-						for shot in shots_to_check:
+						for shot in shots_to_match:
 							for defect_to_match in shot:
 
 								delta = defect - defect_to_match
@@ -200,9 +200,9 @@ class Agent:
 
 								value = self.value(sess, input_vector)
 								action, action_idx = self.policy(sess, input_vector)
-								print(action_idx, action)
-					# 			reward = self.local_env.apply_action(action, defect, defect_matched)
-
+								
+								reward = self.local_env.apply_action(action, defect, defect_to_match)
+								print(action_idx, action, reward)
 					# 			fruit_analysis.append([state, defect-defect_matched, action_idx,
 					# 																	reward, value])
 					# 			fruit_values.append(value)

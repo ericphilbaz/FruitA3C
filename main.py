@@ -13,8 +13,8 @@ n_agents = 1
 # n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 4
-batch = 4
+final_index = 2
+batch = 2
 load_model = False
 
 testing_index = 0
