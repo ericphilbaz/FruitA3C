@@ -28,43 +28,42 @@ class Agent:
 		self.local_net = A3C_Network("net_{0}".format(n_agent), n_inputs_policy,
 									n_inputs_matching, n_actions_policy, trainer)
 
-		# self.actions_available = ["new", "match", "wait"]
-		self.actions_available = ["new", "match"]
+		self.actions_available = ["identical", "different"]
 
 		with tf.variable_scope(self.name):
 			self.episodes = tf.Variable(0, dtype=tf.int64,
 										name='episodes', trainable=False)
 
-	def find_match(self, sess, defect):
-		"""
-		Find the most matching defect based on the matching result
+	# def find_match(self, sess, defect):
+	# 	"""
+	# 	Find the most matching defect based on the matching result
 
-		Parameters
-		----------
-		sess : tf.Session()
-			TensorFlow session used to run the function
-		defect : Defect
-			defect to match
+	# 	Parameters
+	# 	----------
+	# 	sess : tf.Session()
+	# 		TensorFlow session used to run the function
+	# 	defect : Defect
+	# 		defect to match
 
-		Returns
-		-------
-		defect_matched : Defect
-			defect matched
-		"""
+	# 	Returns
+	# 	-------
+	# 	defect_matched : Defect
+	# 		defect matched
+	# 	"""
 
-		defects_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
-		defect_matched, val_matched = defect, -1
+	# 	defects_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
+	# 	defect_matched, val_matched = defect, -1
 
-		for s in defects_to_match:
-			for d in s:
-				val = sess.run(self.local_net.match,
-								feed_dict={self.local_net.matching_vector: defect - d})
-				if val >= val_matched:
-					defect_matched = d
+	# 	for s in defects_to_match:
+	# 		for d in s:
+	# 			val = sess.run(self.local_net.match,
+	# 							feed_dict={self.local_net.matching_vector: defect - d})
+	# 			if val >= val_matched:
+	# 				defect_matched = d
 
-		return defect_matched
+	# 	return defect_matched
 
-	def policy(self, sess, state, defect, defect_matched):
+	def policy(self, sess, input_vector):
 		"""
 		Evaluates the policy
 
@@ -88,13 +87,12 @@ class Agent:
 		"""
 		
 		actions_distribution = sess.run(self.local_net.policy,
-										feed_dict={self.local_net.input_vector:state,
-										self.local_net.matching_vector:defect-defect_matched})
+										feed_dict={self.local_net.input_vector:input_vector})
 		action_idx = np.random.choice(len(actions_distribution[0]), p=actions_distribution[0])
 
 		return self.actions_available[action_idx], action_idx
 
-	def value(self, sess, state, defect, defect_matched):
+	def value(self, sess, input_vector):
 		"""
 		Evaluates the value
 
@@ -106,8 +104,7 @@ class Agent:
 		"""
 
 		value = sess.run(self.local_net.value,
-						feed_dict={self.local_net.input_vector:state,
-									self.local_net.matching_vector:defect-defect_matched})
+						feed_dict={self.local_net.input_vector:input_vector})
 
 		return value
 
@@ -192,38 +189,45 @@ class Agent:
 
 					for defect in self.local_env.fruit:
 
-						defect_matched = self.find_match(sess, defect)
 						state = self.local_env.get_state()
+						shots_to_check = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
 
-						value = self.value(sess, state, defect, defect_matched)
-						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						reward = self.local_env.apply_action(action, defect, defect_matched)
+						for shot in shots_to_check:
+							for defect_to_match in shot:
 
-						fruit_analysis.append([state, defect-defect_matched, action_idx,
-																				reward, value])
-						fruit_values.append(value)
-						fruit_total_reward += reward
+								delta = defect - defect_to_match
+								input_vector = np.concatenate((state, delta), axis=1)
 
-					fruit_avg_reward = fruit_total_reward/self.local_env.fruit.defects_tot
-					fruit_avg_values = np.mean(fruit_values)
+								value = self.value(sess, input_vector)
+								action, action_idx = self.policy(sess, input_vector)
+								print(action_idx, action)
+					# 			reward = self.local_env.apply_action(action, defect, defect_matched)
 
-					v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
+					# 			fruit_analysis.append([state, defect-defect_matched, action_idx,
+					# 																	reward, value])
+					# 			fruit_values.append(value)
+					# 			fruit_total_reward += reward
 
-					if episodes % 8 == 0 and episodes != 0:
+					# 		fruit_avg_reward = fruit_total_reward/self.local_env.fruit.defects_tot
+					# 		fruit_avg_values = np.mean(fruit_values)
 
-						summary = tf.Summary()
-						summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))
-						summary.value.add(tag='Losses/Policy Loss', simple_value=float(p_l))
-						summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
-						summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
-						summary.value.add(tag='Performances/Fruit Average Reward', simple_value=float(fruit_avg_reward))
-						summary.value.add(tag='Performances/Fruit Average Value', simple_value=float(fruit_avg_values))
+					# 		v_l, p_l, e_l, t_l = self.update(sess, fruit_analysis, 1)
 
-						self.summary_writer.add_summary(summary, episodes)
-						self.summary_writer.flush()
+					# 		if episodes % 8 == 0 and episodes != 0:
 
-					episodes += 1
-			sess.run(self.episodes.assign(episodes))
+					# 			summary = tf.Summary()
+					# 			summary.value.add(tag='Losses/Value Loss', simple_value=float(v_l))
+					# 			summary.value.add(tag='Losses/Policy Loss', simple_value=float(p_l))
+					# 			summary.value.add(tag='Losses/Entropy', simple_value=float(e_l))
+					# 			summary.value.add(tag='Losses/Total Loss', simple_value=float(t_l))
+					# 			summary.value.add(tag='Performances/Fruit Average Reward', simple_value=float(fruit_avg_reward))
+					# 			summary.value.add(tag='Performances/Fruit Average Value', simple_value=float(fruit_avg_values))
+
+					# 			self.summary_writer.add_summary(summary, episodes)
+					# 			self.summary_writer.flush()
+
+					# 		episodes += 1
+					# sess.run(self.episodes.assign(episodes))
 
 	def test(self, sess, coord):
 

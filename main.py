@@ -9,8 +9,8 @@ load_path = "dataset/dataset2/"
 # load_path = "dataset/sample/"
 model_path = './model'
 
-# n_agents = 1
-n_agents = multiprocessing.cpu_count()
+n_agents = 1
+# n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
 final_index = 4
@@ -20,12 +20,8 @@ load_model = False
 testing_index = 0
 
 def main():
-	# train.run(n_agents, load_path, model_path, starting_index, final_index, batch, load_model)
+	train.run(n_agents, load_path, model_path, starting_index, final_index, batch, load_model)
 	# test.run(load_path, model_path, testing_index, load_model)
-	
-	global_net = A3C_Network()
-	with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
-		writer = tf.summary.FileWriter('./graphs', sess.graph)
 
 if __name__ == "__main__":
 	main()
