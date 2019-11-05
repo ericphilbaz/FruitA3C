@@ -104,8 +104,8 @@ venv.bak/
 .mypy_cache/
 
 # others
-dataset/dataset/
-dataset/dataset2/
-graphs/
-model/
-imgs/
+/dataset/dataset/
+/dataset/dataset2/
+/graphs/
+/model/
+/imgs/
