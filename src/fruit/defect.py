@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from src.fruit.utils import log10_trasform, sigmoid
+from uuid import uuid4
 
 class Defect:
 	"""
@@ -28,6 +29,7 @@ class Defect:
 		self.shot_name = shot_name
 		self.shot_sizes = shot_sizes
 
+		self.guesses = []
 		self.uuid = None
 		self.index = index
 
@@ -72,3 +74,10 @@ class Defect:
 		delta = [delta_x, delta_y, delta_circularity,
 				delta_eccentricity, delta_solidity, delta_hu]
 		return np.array(delta).reshape((1, 6))
+
+	def apply_uuid(self):
+
+		if self.guesses:
+			self.uuid = max(self.guesses, key=self.guesses.count)
+		else:
+			self.uuid = uuid4()
