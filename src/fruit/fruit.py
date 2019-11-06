@@ -1,4 +1,5 @@
 import tifffile
+from libxmp import XMPFiles, consts
 import ast
 from src.fruit.defect import Defect
 from skimage.measure import label, regionprops
@@ -78,9 +79,9 @@ class Fruit:
 		"""
 
 		name = load_path + "{0}.tiff".format(fruit_index)
-		with tifffile.TiffFile(name) as tif:
-			shots = tif.asarray()
-			answers = ast.literal_eval(tif.pages[0].tags["ImageDescription"].value)
+		shots = tifffile.TiffFile(name).asarray()
+		xmpfile = XMPFiles(file_path=name, open_forupdate=True).get_xmp()
+		answers = ast.literal_eval(xmpfile.get_property(consts.XMP_NS_DC, "description[1]"))
 
 		defects = []
 		for i, (shot, answers_list) in enumerate(zip(shots, answers)):
