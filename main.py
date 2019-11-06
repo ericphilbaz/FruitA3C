@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from src.model.A3C_network import A3C_Network
 
-load_path = "dataset/dataset2/"
+load_path = "dataset/dataset2s/"
 # load_path = "dataset/sample/"
 model_path = './model'
 
@@ -13,7 +13,7 @@ model_path = './model'
 n_agents = multiprocessing.cpu_count()
 
 starting_index = 0
-final_index = 20000
+final_index = 1024
 batch = 64
 load_model = False
 

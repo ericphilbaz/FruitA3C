@@ -52,24 +52,20 @@ class Fruit:
 			next defect to be analyzed
 		"""
 
-		if self.d_index < len(self.shots[self.current_shot]):
-			defect = self.shots[self.current_shot][self.d_index]
-			self.defects_index += 1
-			self.d_index += 1
-			return defect
-		else:
+		if not self.d_index < len(self.shots[self.current_shot]):
 			try:
 				self.temp_shot = self.shots_to_analyze.pop(0)
-				self.shots_analyzed.append(self.current_shot)
-				self.current_shot = self.temp_shot
-				self.shot_index = self.shots_keys.index(self.current_shot)
 			except:
 				raise StopIteration
 			self.d_index = 0
-			defect = self.shots[self.current_shot][self.d_index]
-			self.defects_index += 1
-			self.d_index += 1
-			return defect
+			self.shots_analyzed.append(self.current_shot)
+			self.current_shot = self.temp_shot
+			self.shots_index = self.shots_keys.index(self.current_shot)
+			
+		defect = self.shots[self.current_shot][self.d_index]
+		self.defects_index += 1
+		self.d_index += 1
+		return defect
 
 	def load(self, load_path, fruit_index, defects_thresholds):
 		"""

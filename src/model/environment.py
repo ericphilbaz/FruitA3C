@@ -98,8 +98,8 @@ class Environment:
 			state vector
 		"""
 
-		shots_progress = self.fruit.shot_index/self.fruit.shots_tot
-		defects_progress = self.fruit.defect_index/self.fruit.defects_tot
+		shots_progress = self.fruit.shots_index/self.fruit.shots_tot
+		defects_progress = self.fruit.defects_index/self.fruit.defects_tot
 
 		return np.array([shots_progress, defects_progress]).reshape((1, 2))
 
