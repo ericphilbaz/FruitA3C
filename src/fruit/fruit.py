@@ -22,7 +22,7 @@ class Fruit:
 		"""
 
 		self.index = index
-		self.defects, self.defects_indices = Fruit.load(load_path, index, defects_thresholds)
+		self.defects = Fruit.load(load_path, index, defects_thresholds)
 
 		self.shots_tot = len(self.defects)
 		self.defects_tot = sum([len(defects_per_shot) for defects_per_shot in self.defects])
@@ -30,9 +30,6 @@ class Fruit:
 		self.shot_index = next(i for i, defects_list in enumerate(self.defects) if defects_list) if self.defects_tot else 0
 		self.defect_in_shot_index = 0
 		self.defect_index = -1
-
-		# self.defects_analyzed = 0
-		self.defects_identified = 0
 		
 	def __iter__(self):
 		return self
@@ -91,6 +88,6 @@ class Fruit:
 			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, shot.shape, props) for defect_index, props in zip(answers_list, properties)]
 			defects.append(defects_in_shot)
 
-		defects_indices = set(d.index for l in defects for d in l)
+		# defects_indices = set(d.index for l in defects for d in l)
 
-		return defects, defects_indices
+		return defects

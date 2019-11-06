@@ -18,12 +18,10 @@ class Defect:
 			name of the shot
 		index : int
 			index of the defect (on the fruit)
-		bounding_box : array
-			bounding limits of the defect
-		area : int
-			area of the defect
 		shot_sizes : array
 			sizes of the shot
+		props : RegionProps object
+			properties of the region
 		"""
 
 		self.shot_name = shot_name
@@ -43,6 +41,18 @@ class Defect:
 		# self.moments_hu = log10_trasform(props.moments_hu)
 
 	def __eq__(self, defect):
+		"""
+		Used to make a comparison between two defects
+
+		Parameters
+		----------
+		defect : Defect
+			other defect
+
+		Returns
+		-------
+		a boolean that tells if the two defect have the same index
+		"""
 		return True if self.index == defect.index else False
 
 	def __sub__(self, defect):
@@ -55,7 +65,8 @@ class Defect:
 			other defect
 
 		Returns
-			an array of differences, in absolute value, between 0 (different) and 1 (same)
+		-------
+		an array of differences, in absolute value, between 0 (different) and 1 (same)
 		"""
 
 		noise = 0.01
