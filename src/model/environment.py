@@ -108,7 +108,7 @@ class Environment:
 
 		return np.array([shots_progress, defects_progress]).reshape((1, 2))
 
-	def add_uuid(self, defect, defect_matched=None):
+	# def guess_uuid(self, defect, defect_to_match):
 		"""
 		Adds uuid to the defect analyzed
 
@@ -125,20 +125,20 @@ class Environment:
 			number of defects identified in the process
 		"""
 
-		uuid = uuid4()
-		identified = 0
+		# uuid = uuid4()
+		# identified = 0
 
-		if not defect_matched:
-			defect.uuid = uuid
-			identified += 1
-		else:
-			if not defect_matched.uuid:
-				defect_matched.uuid = uuid
-				identified += 1
-			defect.uuid = defect_matched.uuid
-			identified += 1
+		# if not defect_matched:
+		# 	defect.uuid = uuid
+		# 	identified += 1
+		# else:
+		# 	if not defect_matched.uuid:
+		# 		defect_matched.uuid = uuid
+		# 		identified += 1
+		# 	defect.uuid = defect_matched.uuid
+		# 	identified += 1
 
-		return identified
+		# return identified
 
 	def apply_action(self, action, defect, defect_to_match):
 		"""
@@ -159,18 +159,22 @@ class Environment:
 			reward for the applied action
 		"""
 
+		if not defect_to_match.uuid:
+			defect_to_match.uuid = uuid4()
+
 		if action is "identical":
 			if defect == defect_to_match:
 				reward = +1
 			else:
 				reward = -1
+			defect.guesses.append(defect_to_match.uuid)
 		elif action is "different":
 			if defect == defect_to_match:
 				reward = -1
 			else:
 				reward = +1
 		else:
-			print("Something is wrong.")
+			print("Incorrect action")
 
 		# if action is "wait":
 		# 	reward = 0

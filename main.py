@@ -9,19 +9,19 @@ load_path = "dataset/dataset2/"
 # load_path = "dataset/sample/"
 model_path = './model'
 
-n_agents = 1
-# n_agents = multiprocessing.cpu_count()
+# n_agents = 1
+n_agents = multiprocessing.cpu_count()
 
-starting_index = 0
-final_index = 2
-batch = 2
-load_model = False
+starting_index = 10000
+final_index = 20000
+batch = 64
+load_model = True
 
-testing_index = 0
+testing_index = 1
 
 def main():
 	train.run(n_agents, load_path, model_path, starting_index, final_index, batch, load_model)
-	# test.run(load_path, model_path, testing_index, load_model)
+	test.run(load_path, model_path, testing_index, load_model)
 
 if __name__ == "__main__":
 	main()
