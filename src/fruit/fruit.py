@@ -3,6 +3,7 @@ from libxmp import XMPFiles, consts
 import ast
 from src.fruit.defect import Defect
 from skimage.measure import label, regionprops
+from uuid import uuid4
 
 class Fruit:
 	"""
@@ -22,14 +23,21 @@ class Fruit:
 		"""
 
 		self.index = index
-		self.defects = Fruit.load(load_path, index, defects_thresholds)
 
-		self.shots_tot = len(self.defects)
-		self.defects_tot = sum([len(defects_per_shot) for defects_per_shot in self.defects])
+		self.shots = self.load(load_path, index, defects_thresholds)
+		self.shots_tot = len(self.shots)
+		self.shots_keys = [key for key, vals in self.shots.items()]
+		self.shots_to_analyze = [shot for shot, defects_list in self.shots.items() if len(defects_list)]
+		self.shots_analyzed = []
 
-		self.shot_index = next(i for i, defects_list in enumerate(self.defects) if defects_list) if self.defects_tot else 0
-		self.defect_in_shot_index = 0
-		self.defect_index = -1
+		self.is_analizable = len(self.shots_to_analyze) > 1	
+
+		self.defects_tot = sum([len(self.shots[index]) for index in self.shots_to_analyze])
+
+		self.current_shot = None
+		self.d_index = None
+		if self.shots_to_analyze:
+			self.setup()
 		
 	def __iter__(self):
 		return self
@@ -44,21 +52,26 @@ class Fruit:
 			next defect to be analyzed
 		"""
 
-		if self.defect_in_shot_index == len(self.defects[self.shot_index]):
-			self.defect_in_shot_index = 0
-			self.shot_index += next((i for i, v in enumerate(self.defects[self.shot_index+1:]) if v), 0)+1
-			
-		if self.defect_index < self.defects_tot-1:
-			defect = self.defects[self.shot_index][self.defect_in_shot_index]
-			self.defect_in_shot_index += 1
-			self.defect_index += 1
+		if self.d_index < len(self.shots[self.current_shot]):
+			defect = self.shots[self.current_shot][self.d_index]
+			self.defects_index += 1
+			self.d_index += 1
 			return defect
 		else:
-			raise StopIteration
+			try:
+				self.temp_shot = self.shots_to_analyze.pop(0)
+				self.shots_analyzed.append(self.current_shot)
+				self.current_shot = self.temp_shot
+				self.shot_index = self.shots_keys.index(self.current_shot)
+			except:
+				raise StopIteration
+			self.d_index = 0
+			defect = self.shots[self.current_shot][self.d_index]
+			self.defects_index += 1
+			self.d_index += 1
+			return defect
 
-
-	@staticmethod
-	def load(load_path, fruit_index, defects_thresholds):
+	def load(self, load_path, fruit_index, defects_thresholds):
 		"""
 		Loads shots and answers (indices of defects on the fruit)
 
@@ -80,14 +93,25 @@ class Fruit:
 		xmpfile = XMPFiles(file_path=name, open_forupdate=True).get_xmp()
 		answers = ast.literal_eval(xmpfile.get_property(consts.XMP_NS_DC, "description[1]"))
 
-		defects = []
-		for i, (shot, answers_list) in enumerate(zip(shots, answers)):
+		shots_dict = {}
+		for i, (shot, ans) in enumerate(zip(shots, answers)):
 			thresholds = shot < defects_thresholds[0]
 			labels = label(thresholds)
 			properties = regionprops(labels, coordinates="rc")
-			defects_in_shot = [Defect("{0}_{1}".format(fruit_index, i), defect_index, shot.shape, props) for defect_index, props in zip(answers_list, properties)]
-			defects.append(defects_in_shot)
 
-		# defects_indices = set(d.index for l in defects for d in l)
+			defects = [Defect("{0}_{1}".format(fruit_index, i), defect_index, shot.shape, props)\
+						for defect_index, props in zip(ans, properties)]
+			shots_dict["shot_{0}".format(i)] = defects
 
-		return defects
+		return shots_dict
+
+	def setup(self):
+
+		if self.shots_to_analyze:
+			self.current_shot = self.shots_to_analyze.pop(0)
+			self.d_index = 0
+			self.defects_index = 0
+
+		for defect in self.shots[self.current_shot]:
+			defect.uuid = uuid4()
+			self.__next__()

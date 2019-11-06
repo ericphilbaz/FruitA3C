@@ -81,12 +81,7 @@ class Environment:
 				Environment.sync(sess, "global_env", self.scope)
 
 				self.fruit = fruit
-
 				self.indices_analyzed = set()
-
-				# self.answers_dict = {key: set() for key in self.fruit.defects_indices}
-				# self.uuids_dict = dict()
-				# self.loss = self.get_loss()
 				
 			except:
 				coord.request_stop()
@@ -107,38 +102,6 @@ class Environment:
 		defects_progress = self.fruit.defect_index/self.fruit.defects_tot
 
 		return np.array([shots_progress, defects_progress]).reshape((1, 2))
-
-	# def guess_uuid(self, defect, defect_to_match):
-		"""
-		Adds uuid to the defect analyzed
-
-		Parameters
-		----------
-		defect : Defect
-			defect to apply action
-		defect_matched : Defect
-			defect matched
-
-		Returns
-		-------
-		identified : int
-			number of defects identified in the process
-		"""
-
-		# uuid = uuid4()
-		# identified = 0
-
-		# if not defect_matched:
-		# 	defect.uuid = uuid
-		# 	identified += 1
-		# else:
-		# 	if not defect_matched.uuid:
-		# 		defect_matched.uuid = uuid
-		# 		identified += 1
-		# 	defect.uuid = defect_matched.uuid
-		# 	identified += 1
-
-		# return identified
 
 	def apply_action(self, action, defect, defect_to_match):
 		"""
@@ -175,28 +138,5 @@ class Environment:
 				reward = +1
 		else:
 			print("Incorrect action")
-
-		# if action is "wait":
-		# 	reward = 0
-		# 	identified = 0
-		# elif action is "match":
-		# 	if defect.index == defect_matched.index:
-		# 		reward = +1
-		# 	else:
-		# 		reward = -1
-		# 	self.indices_analyzed.add(defect.index)
-		# 	identified = self.add_uuid(defect, defect_matched)
-		# elif action is "new":
-		# 	if defect.index == defect_matched.index:
-		# 		reward = -1
-		# 	else:
-		# 		if defect.index in self.indices_analyzed:
-		# 			reward = -1
-		# 		else:
-		# 			reward = +1
-		# 	self.indices_analyzed.add(defect.index)
-		# 	identified = self.add_uuid(defect)
-
-		# self.fruit.defects_identified += identified
 
 		return reward

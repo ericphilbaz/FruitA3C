@@ -150,22 +150,18 @@ class Agent:
 				self.local_env.load_fruit(sess, coord)
 				lock.release()
 				
-				if self.local_env.fruit is not None:
+				if self.local_env.fruit is not None and self.local_env.fruit.is_analizable:
 
 					fruit_analysis = []
 					fruit_values = []
 					fruit_rewards = []
 
 					for defect in self.local_env.fruit:
-
-						shots_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
-						if not [d for l in shots_to_match for d in l]:
-							shots_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index+1]
-						
+		
 						state = self.local_env.get_state()
 										
-						for shot in shots_to_match:
-							for defect_to_match in shot:
+						for shot_key in self.local_env.fruit.shots_analyzed:
+							for defect_to_match in self.local_env.fruit.shots[shot_key]:
 
 								delta = defect - defect_to_match
 								input_vector = np.concatenate((state, delta), axis=1)
