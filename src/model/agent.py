@@ -216,31 +216,42 @@ class Agent:
 
 					fruit_analysis = []
 					fruit_values = []
-					fruit_total_reward = 0
+					fruit_rewards = []
 
 					for defect in self.local_env.fruit:
 
-						defect_matched = self.find_match(sess, defect)
+						shots_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index]
+						if not [d for l in shots_to_match for d in l]:
+							shots_to_match = self.local_env.fruit.defects[:self.local_env.fruit.shot_index+1]
+						
 						state = self.local_env.get_state()
+										
+						for shot in shots_to_match:
+							for defect_to_match in shot:
 
-						value = self.value(sess, state, defect, defect_matched)
-						action, action_idx = self.policy(sess, state, defect, defect_matched)
-						reward = self.local_env.apply_action(action, defect, defect_matched)
+								delta = defect - defect_to_match
+								input_vector = np.concatenate((state, delta), axis=1)
 
-						fruit_analysis.append([state, defect-defect_matched, action_idx,
-																				reward, value])
-						fruit_values.append(value)
-						fruit_total_reward += reward
+								value = self.value(sess, input_vector)
+								action, action_idx = self.policy(sess, input_vector)
+								
+								reward = self.local_env.apply_action(action, defect, defect_to_match)
 
-						print("############################################################")
-						print("Defect", defect.index,
-							"of shot", defect.shot_name,
-							"matched with defect", defect_matched.index,
-							"of shot", defect_matched.shot_name)
-						print("Action applied is", "\""+action+"\"",
-							"with reward", reward)
+								fruit_analysis.append([input_vector, action_idx, reward, value])
+								fruit_values.append(value)
+								fruit_rewards.append(reward)
 
-					fruit_avg_reward = fruit_total_reward/self.local_env.fruit.defects_tot
+								print("############################################################")
+								print("Defect", defect.index,
+									"of shot", defect.shot_name,
+									"matched with defect", defect_to_match.index,
+									"of shot", defect_to_match.shot_name)
+								print("Action applied is", "\""+action+"\"",
+									"with reward", reward)
+
+						defect.choose_uuid()
+
+					fruit_avg_reward = np.mean(fruit_rewards)
 					fruit_avg_values = np.mean(fruit_values)
 
 					print()

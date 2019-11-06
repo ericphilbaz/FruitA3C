@@ -17,11 +17,11 @@ final_index = 20000
 batch = 64
 load_model = True
 
-testing_index = 1
+testing_index = 35
 
 def main():
 	train.run(n_agents, load_path, model_path, starting_index, final_index, batch, load_model)
-	test.run(load_path, model_path, testing_index, load_model)
+	# test.run(load_path, model_path, testing_index, load_model)
 
 if __name__ == "__main__":
 	main()
